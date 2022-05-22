@@ -1,0 +1,29 @@
+#pragma once
+#include "cocos2d.h"
+#include"Attribute.h"
+USING_NS_CC;
+
+class Gun :public Sprite
+{
+	/*枪类*/
+public:
+	/*枪也受物理引擎制约，因为枪与人物必须受关节连接*/
+	static Gun* createGunWithPhysicsBody(const std::string& filename);	
+
+	void setAttribute(GunAttribute attr);
+	GunAttribute getAttribute();
+	void setBullets(int num);
+	int getBullets();
+
+	virtual void fire() = 0;
+	virtual void stopFire() = 0;
+	
+protected:
+	void addBulletWithPhysicsBody(const std::string& filename);
+	/*生成大量子弹时，应使用精灵帧对象节约内存*/
+	virtual void setFireParticleSystem() {};
+
+	int bulletsLeft;
+	GunAttribute attr;
+	
+};
