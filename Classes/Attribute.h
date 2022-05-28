@@ -3,9 +3,9 @@
 USING_NS_CC;
 
 //must be edited
-#define HANDGUN_ARR GunAttribute(0,0,0,0,0);
-#define SNIPERGUN_ARR GunAttribute(0,0,0,0,0);
-#define ARGUN_ARR GunAttribute(0,0,0,0,0);
+#define HANDGUN_ARR {0,0,0,0,0}
+#define SNIPERGUN_ARR {0,0,0,0,0}
+#define ARGUN_ARR {0,0,0,0,0}
 struct GunAttribute
 {
 	int maxCapacity;	//弹夹容量
@@ -24,17 +24,17 @@ class ActorInformation
 {
 	/*记载人物的属性类*/
 public:
-	ActorInformation(const Vec2& v, const bool isFire, const int gunType) :
-		position(v), isFire(isFire), gunType(gunType) {};
+	ActorInformation(const Vec2& v = Vec2::ZERO, const bool isFire = 0, const int gunType = 0) :
+		_position(v), _isFire(isFire), _gunType(gunType) {};
 	void changePosition(Vec2 newVec2);
 	void changeIsFire(bool isFire);
 	void changeGunType(int gunType);
-
 	std::string toString();		//转换成字符串(for net)
 	static ActorInformation toActorInformation(const std::string& s);	//从字符串转回(for net)
+
 private:
-	Vec2 position;
-	bool isFire;
-	int gunType;
+	Vec2 _position;
+	bool _isFire;
+	int _gunType;
 };
 

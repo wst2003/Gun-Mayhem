@@ -1,6 +1,6 @@
 #pragma once
 #include "cocos2d.h"
-#include"Attribute.h"
+#include "Attribute.h"
 USING_NS_CC;
 
 class Gun :public Sprite
@@ -12,18 +12,21 @@ public:
 
 	void setAttribute(GunAttribute attr);
 	GunAttribute getAttribute();
+
+	//增加子弹数量，不会超过最大值
 	void setBullets(int num);
 	int getBullets();
-
-	virtual void fire() = 0;
-	virtual void stopFire() = 0;
-	
-protected:
+	virtual void fire();
+	virtual void stopFire() {};
 	void addBulletWithPhysicsBody(const std::string& filename);
+protected:
+//	void addBulletWithPhysicsBody(const std::string& filename);
+
 	/*生成大量子弹时，应使用精灵帧对象节约内存*/
 	virtual void setFireParticleSystem() {};
 
 	int bulletsLeft;
 	GunAttribute attr;
+	PhysicsBody* _physicsBody;
 	
 };

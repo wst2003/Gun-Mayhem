@@ -1,39 +1,30 @@
 #include "cocos2d.h"
 #include "StartGameScene.h"
-#include "RegisterOrLoginScene.h"
-#include "Client.h"
-#include"chatScene.h"
-#include"RankingScene.h"
-#include<cstring>
+#include "HandGun.h"
+#include "CharEncodingConvert.h"
+#include "GameScene.h"
 USING_NS_CC;
 
-bool isLogin = false;
 Scene* StartGameScene::createScene()
 {
+	// 'scene' is an autorelease object
 	auto scene = Scene::create();
 
+	// 'layer' is an autorelease object
 	auto layer = StartGameScene::create();
 
+	// add layer as a child to scene
 	scene->addChild(layer);
 
+	// return the scene
 	return scene;
 }
 
-void StartGameScene::onEnter()
-{
-	Layer::onEnter();
-	if (Client::getInstance()->getIsLogin()) {
-		loginStatusLabel->setString("Login!\n" + Client::getInstance()->myID);
-		isLogin = true;
-	}
-	else {
-		loginStatusLabel->setString("Not Logged in!");
-	}
-}
-
+// on "init" you need to initialize your instance
 bool StartGameScene::init()
 {
-	
+	//////////////////////////////
+	// 1. super init first
 	if (!Layer::init())
 	{
 		return false;
@@ -42,47 +33,47 @@ bool StartGameScene::init()
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	auto registerOrLoginMenuItem = MenuItemFont::create("Register /\nLogin", CC_CALLBACK_1(StartGameScene::registerOrLoginCallBack, this));
-	registerOrLoginMenuItem->setFontSize(35);
-	auto registerOrLoginMenu = Menu::create(registerOrLoginMenuItem, NULL);
-	registerOrLoginMenu->setPosition(Vec2(100,300));
-	this->addChild(registerOrLoginMenu, 1);
+	auto selectMapSceneMenuItem = MenuItemFont::create(a2u("单机游戏"), 
+		CC_CALLBACK_1(StartGameScene::selectMapSceneCallBack, this));
+	auto settingSceneMenuItem = MenuItemFont::create(a2u("设置"), 
+		CC_CALLBACK_1(StartGameScene::settingsSceneCallBack, this));
+	auto exitCallBackMenuItem=MenuItemFont::create(a2u("退出游戏"), 
+		CC_CALLBACK_1(StartGameScene::exitCallBack, this));
 
-	loginStatusLabel = Label::createWithTTF("", "fonts/Arial.ttf",  30);
-	loginStatusLabel->setPosition(Vec2(visibleSize.width - 100, 60));
-	this->addChild(loginStatusLabel, 1);
-
-	auto chatMenuItem = MenuItemFont::create("Chat", CC_CALLBACK_1(StartGameScene::chatSceneCallBack, this));
-	chatMenuItem->setFontSize(35);
-	auto chatMenu = Menu::create(chatMenuItem, NULL);
-	chatMenu->setPosition(Vec2(260, 300));
-	this->addChild(chatMenu, 1);
-
-	auto rankingMenuItem = MenuItemFont::create("Ranking", CC_CALLBACK_1(StartGameScene::rankingSceneCallBack, this));
-	rankingMenuItem->setFontSize(35);
-	auto rankingMenu = Menu::create(rankingMenuItem, NULL);
-	rankingMenu->setPosition(Vec2(380, 300));
-	this->addChild(rankingMenu, 1);
-
+	selectMapSceneMenuItem->setPosition(visibleSize.width / 2, visibleSize.height * 5 / 6);
+	settingSceneMenuItem->setPosition(visibleSize.width / 2, visibleSize.height / 2);
+	exitCallBackMenuItem->setPosition(visibleSize.width / 2, visibleSize.height / 6);
+	
+	auto menu = Menu::create(selectMapSceneMenuItem, settingSceneMenuItem, exitCallBackMenuItem, NULL);
+	menu->setPosition(0, 0);
+	this->addChild(menu);
 	return true;
 }
 
-void StartGameScene::registerOrLoginCallBack(Ref* r)
+//
+void StartGameScene::selectMapSceneCallBack(Ref* r)
 {
-	auto registerOrLoginScene = RegisterOrLoginScene::createScene();
-	Director::getInstance()->pushScene(registerOrLoginScene);
+	//创造要到达的新场景及动画
+	Scene* divisionScene = GameScene::createScene();
+	TransitionJumpZoom* divisionTran = TransitionJumpZoom::create(1.0f, divisionScene);
+
+	Director::getInstance()->replaceScene(divisionTran);
 }
 
-void StartGameScene::chatSceneCallBack(Ref* r)
+//
+void StartGameScene::settingsSceneCallBack(Ref* r)
 {
-	auto chatScene = ChatScene::createScene();
-	Director::getInstance()->pushScene(chatScene);
+
 }
 
-void StartGameScene::rankingSceneCallBack(Ref* r)
+//
+void StartGameScene::exitCallBack(Ref* r)
 {
-	if (isLogin) {
-		auto rankingScene = RankingScene::createScene();
-		Director::getInstance()->pushScene(rankingScene);
-	}
+	Director::getInstance()->end();
+}
+
+//
+void StartGameScene::NetSceneCallBack(Ref* r)
+{
+
 }
