@@ -27,17 +27,27 @@ bool RegisterOrLoginScene::init()
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	auto bg = Sprite::create("backgrounds/ReOrLogbg.png");
+	auto bg = Sprite::create("ReOrLogbg.png");
 	bg->setScaleX(visibleSize.width / bg->getContentSize().width);
 	bg->setScaleY(visibleSize.height / bg->getContentSize().height);
 	bg->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
 	this->addChild(bg, 0);
 
+	auto backButton = MenuItemImage::create("back.png", "back_selected.png", "back.png",
+		CC_CALLBACK_1(RegisterOrLoginScene::backToMenu, this));
+	auto mnBackMenu = Menu::create(backButton, NULL);
+	mnBackMenu->setPosition(Vec2(visibleSize.width-200, 50));
+	this->addChild(mnBackMenu, 1);
+	/*
 	auto backMenuItem = MenuItemFont::create("Back",CC_CALLBACK_1(RegisterOrLoginScene::backToMenu,this));
 	backMenuItem->setFontSize(35);
 	auto backMenu = Menu::create(backMenuItem, NULL);
 	backMenu->setPosition(Vec2(visibleSize.width - 100, 50));
 	this->addChild(backMenu);
+*/
+	auto scroll = Sprite::create("Scroll.png");
+	scroll->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2 + 70));
+	this->addChild(scroll);
 
 	registerEdixBox = ui::EditBox::create(Size(300, 50), ui::Scale9Sprite::create("chatBg.png"));
 	registerEdixBox->setAnchorPoint(Point(0, 0));
@@ -52,17 +62,21 @@ bool RegisterOrLoginScene::init()
 	auto registerMenuItem = MenuItemFont::create("Register!", CC_CALLBACK_1(RegisterOrLoginScene::registerCallBack, this));
 	registerMenuItem->setFontSize(35);
 	auto registerMenu = Menu::create(registerMenuItem, NULL);
-	registerMenu->setPosition(Vec2(visibleSize.width/2,450));
+	registerMenu->setPosition(Vec2(visibleSize.width/2,420));
 	this->addChild(registerMenu, 1);
 
 	registerStatusLabel = Label::createWithTTF(" ","fonts/Arial.ttf",35);
-	registerStatusLabel->setPosition(Vec2(200, 400));
+	registerStatusLabel->setPosition(Vec2(visibleSize.width / 2 +350, visibleSize.height / 2 + 80));
 	registerStatusLabel->setSystemFontSize(25);
 	this->addChild(registerStatusLabel,1);
 	
+	auto scrollSub = Sprite::create("Scroll.png");
+	scrollSub->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2 - 120));
+	this->addChild(scrollSub);
+
 	loginEdixBox = ui::EditBox::create(Size(300, 50), ui::Scale9Sprite::create("chatBg.png"));
 	loginEdixBox->setAnchorPoint(Point(0, 0));
-	loginEdixBox->setPosition(Vec2(visibleSize.width / 2 - 150, visibleSize.height / 2 -150));
+	loginEdixBox->setPosition(Vec2(visibleSize.width / 2 - 150, visibleSize.height / 2 -130));
 	loginEdixBox->setPlaceHolder("Please Enter Your ID:");//Õ¼Î»×Ö·û
 	loginEdixBox->setMaxLength(25);
 	loginEdixBox->setInputMode(EditBox::InputMode::NUMERIC);
@@ -73,11 +87,11 @@ bool RegisterOrLoginScene::init()
 	auto loginMenuItem = MenuItemFont::create("Login!", CC_CALLBACK_1(RegisterOrLoginScene::loginCallBack, this));
 	loginMenuItem->setFontSize(35);
 	auto loginMenu = Menu::create(loginMenuItem, NULL);
-	loginMenu->setPosition(Vec2(visibleSize.width / 2, 250));
+	loginMenu->setPosition(Vec2(visibleSize.width / 2, 230));
 	this->addChild(loginMenu, 1);
 
 	loginStatusLabel = Label::createWithTTF(" ", "fonts/Arial.ttf", 35);
-	loginStatusLabel->setPosition(Vec2(200, 200));
+	loginStatusLabel->setPosition(Vec2(visibleSize.width / 2 +350, visibleSize.height / 2 - 110));
 	loginStatusLabel->setSystemFontSize(25);
 	this->addChild(loginStatusLabel, 1);
 	Client::getInstance();
@@ -85,8 +99,6 @@ bool RegisterOrLoginScene::init()
 	return true;
 
 }
-
-
 void RegisterOrLoginScene::backToMenu(Ref* r)
 {
 	Director::getInstance()->popScene();

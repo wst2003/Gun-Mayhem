@@ -13,13 +13,16 @@ class RankingScene : public cocos2d::Layer
 public:
 	static cocos2d::Scene* createScene();
 	virtual bool init();
-	
-	static std::vector<Label*> rankingLabels;
-	void onMouseScroll(Event* event);
-	void backToMenu(Ref* r);
 
+	static std::vector<Label*> rankingLabels;
+	static std::vector<std::string>rankingData;
+	void onMouseScroll(Event* event);
+	void updateRankingLabels(float dt);
+
+	void backCallBack(Ref* r);
 
 	CREATE_FUNC(RankingScene);
 };
+
 
 #endif

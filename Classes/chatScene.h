@@ -26,7 +26,7 @@ public:
 
 	Text* chatText;
 	ui::EditBox* sendTextEdixBox;
-	
+	void backCallBack(Ref* r);
 	CREATE_FUNC(ChatScene);
 };
 

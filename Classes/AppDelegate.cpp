@@ -3,8 +3,10 @@
 
 USING_NS_CC;
 
-static cocos2d::Size designResolutionSize = cocos2d::Size(32*48,24*32);
-
+static cocos2d::Size designResolutionSize = cocos2d::Size(1350, 900);
+//static cocos2d::Size smallResolutionSize = cocos2d::Size(960, 640);
+//static cocos2d::Size mediumResolutionSize = cocos2d::Size(1024, 768);
+//static cocos2d::Size largeResolutionSize = cocos2d::Size(2048, 1536);
 //
 AppDelegate::AppDelegate() {
 
@@ -57,6 +59,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
 
     // create a scene. it's an autorelease object
     auto scene = StartGameScene::createScene();
+    srand((unsigned int)time(NULL));
 
     // run
     director->runWithScene(scene);
