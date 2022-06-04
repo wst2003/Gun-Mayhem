@@ -9,10 +9,11 @@ class Brand:public Node
 public:
 	Brand(int actorNum, std::string name, int bulletsLeft, int livesLeft, int lifePercent = 100);
 	//构造函数里部署相对位置
+	/*
 	void changeName(std::string name);
 	void changeBulletsLeft(int bulletsLeft);
 	void changeLivesLeft(int livesLeft);
-	void changeLifePercent(int lifePercent);
+	void changeLifePercent(int lifePercent);*/
 private:
 	Sprite* s;
 	Label* nameLabel;
@@ -20,3 +21,8 @@ private:
 	Label* livesLeftLabel;
 	LoadingBar* bloodBar;
 };
+
+
+
+
+

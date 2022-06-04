@@ -16,17 +16,26 @@ public:
 	//增加子弹数量，不会超过最大值
 	void setBullets(int num);
 	int getBullets();
-	virtual void fire();
+	virtual bool fire();
 	virtual void stopFire() {};
 	void addBulletWithPhysicsBody(const std::string& filename);
+	void bulletReloading(float dt);
+	bool getIsReloading();
+	void setIsReloading(bool isReloading);
+	bool getFirable();
+
+
+    bool _firable;
 protected:
 //	void addBulletWithPhysicsBody(const std::string& filename);
 
 	/*生成大量子弹时，应使用精灵帧对象节约内存*/
 	virtual void setFireParticleSystem() {};
-
-	int bulletsLeft;
+	bool _isReloading;
+	
+	int bulletsLeft = 0;
 	GunAttribute attr;
 	PhysicsBody* _physicsBody;
 	
+	clock_t last;
 };

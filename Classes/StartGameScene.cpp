@@ -1,10 +1,15 @@
 #include "cocos2d.h"
 #include "StartGameScene.h"
-#include "HandGun.h"
-#include "CharEncodingConvert.h"
-#include "GameScene.h"
+#include "RegisterOrLoginScene.h"
+#include "Client.h"
+#include"chatScene.h"
+#include"RankingScene.h"
+#include"OptionScene.h"
+#include"SelectMapScene.h"
+#include "SystemHeader.h"
+#include<cstring>
 USING_NS_CC;
-
+bool isLogin = false;
 Scene* StartGameScene::createScene()
 {
 	// 'scene' is an autorelease object
@@ -20,6 +25,7 @@ Scene* StartGameScene::createScene()
 	return scene;
 }
 
+
 // on "init" you need to initialize your instance
 bool StartGameScene::init()
 {
@@ -29,51 +35,78 @@ bool StartGameScene::init()
 	{
 		return false;
 	}
-
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	auto selectMapSceneMenuItem = MenuItemFont::create(a2u("单机游戏"), 
-		CC_CALLBACK_1(StartGameScene::selectMapSceneCallBack, this));
-	auto settingSceneMenuItem = MenuItemFont::create(a2u("设置"), 
-		CC_CALLBACK_1(StartGameScene::settingsSceneCallBack, this));
-	auto exitCallBackMenuItem=MenuItemFont::create(a2u("退出游戏"), 
-		CC_CALLBACK_1(StartGameScene::exitCallBack, this));
+	auto backGround = Sprite::create("originalbg.png");
+	backGround->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
+	this->addChild(backGround, 0);
 
-	selectMapSceneMenuItem->setPosition(visibleSize.width / 2, visibleSize.height * 5 / 6);
-	settingSceneMenuItem->setPosition(visibleSize.width / 2, visibleSize.height / 2);
-	exitCallBackMenuItem->setPosition(visibleSize.width / 2, visibleSize.height / 6);
-	
-	auto menu = Menu::create(selectMapSceneMenuItem, settingSceneMenuItem, exitCallBackMenuItem, NULL);
-	menu->setPosition(0, 0);
-	this->addChild(menu);
+	auto startButton = MenuItemImage::create("startgamebutton.png", "startgamebuttonselected.png", "startgamebutton.png",
+		CC_CALLBACK_1(StartGameScene::selectMapSceneCallBack, this));
+	auto startMn = Menu::create(startButton, NULL);
+	startMn->setPosition(Vec2(visibleSize.width * 5 / 7+150, visibleSize.height * 5 / 7));
+	this->addChild(startMn);
+
+	auto ROLButton = MenuItemImage::create("ROLbuttonnormal.png", "ROLbuttonselected.png", "ROLbuttonnormal.png",
+		CC_CALLBACK_1(StartGameScene::registerOrLoginCallBack, this));
+	auto ROLMn = Menu::create(ROLButton, NULL);
+	ROLMn->setPosition(Vec2(visibleSize.width * 5 / 7 + 150, visibleSize.height * 5 / 7-90));
+	this->addChild(ROLMn);
+
+	auto optionsButton = MenuItemImage::create("optionbuttonnormal.png", "optionbuttonselected.png", "optionbuttonnormal.png",
+		CC_CALLBACK_1(StartGameScene::settingsSceneCallBack, this));
+	auto optionsMn = Menu::create(optionsButton, NULL);
+	optionsMn->setPosition(Vec2(visibleSize.width * 5 / 7 + 150, visibleSize.height * 5 / 7 - 180));
+	this->addChild(optionsMn);
+
+	auto chatButton = MenuItemImage::create("chatscenebuttonnormal.png", "chatscenebuttonselected.png", "chatscenebuttonnormal.png",
+		CC_CALLBACK_1(StartGameScene::chatSceneCallBack, this));
+	auto chatMn = Menu::create(chatButton, NULL);
+	chatMn->setPosition(Vec2(visibleSize.width * 5 / 7 + 150, visibleSize.height * 5 / 7 - 270));
+	this->addChild(chatMn);
+
+	auto quitButton = MenuItemImage::create("quitbuttonnormal.png", "quitbuttonselected.png", "quitbuttonnormal.png",
+		CC_CALLBACK_1(StartGameScene::exitCallBack, this));
+	auto quitMn = Menu::create(quitButton, NULL);
+	quitMn->setPosition(Vec2(visibleSize.width * 5 / 7 + 150, visibleSize.height * 5 / 7 - 360));
+	this->addChild(quitMn);
+
+	auto rankButton = MenuItemImage::create("rankbuttonnormal.png", "rankbuttonnormalselected.png", "rankbuttonnormal.png",
+		CC_CALLBACK_1(StartGameScene::rankingSceneCallBack, this));
+	auto rankMn = Menu::create(rankButton, NULL);
+	rankMn->setPosition(Vec2(visibleSize.width * 5 / 7 + 150, visibleSize.height * 5 / 7 - 450));
+	this->addChild(rankMn);
 	return true;
 }
-
-//
-void StartGameScene::selectMapSceneCallBack(Ref* r)
-{
-	//创造要到达的新场景及动画
-	Scene* divisionScene = GameScene::createScene();
-	TransitionJumpZoom* divisionTran = TransitionJumpZoom::create(1.0f, divisionScene);
-
-	Director::getInstance()->replaceScene(divisionTran);
-}
-
-//
-void StartGameScene::settingsSceneCallBack(Ref* r)
-{
-
-}
-
-//
 void StartGameScene::exitCallBack(Ref* r)
 {
 	Director::getInstance()->end();
 }
 
-//
-void StartGameScene::NetSceneCallBack(Ref* r)
-{
 
+void StartGameScene::selectMapSceneCallBack(Ref* r)
+{
+	auto SelectMapScene = SelectMapScene::createScene();
+	Director::getInstance()->pushScene(SelectMapScene);
+}
+void StartGameScene::registerOrLoginCallBack(Ref* r)
+{
+	auto RegisterOrLoginScene = RegisterOrLoginScene::createScene();
+	Director::getInstance()->pushScene(RegisterOrLoginScene);
+}
+void StartGameScene::chatSceneCallBack(Ref* r)
+{
+	auto ChatScene = ChatScene::createScene();
+	Director::getInstance()->pushScene(ChatScene);
+}
+void StartGameScene::settingsSceneCallBack(Ref* r)
+{
+	auto OptionScene = OptionScene::createScene();
+	Director::getInstance()->pushScene(OptionScene);
+}
+void StartGameScene::rankingSceneCallBack(Ref* r)
+{
+	auto RankingScene = RankingScene::createScene();
+	Director::getInstance()->pushScene(RankingScene);
 }

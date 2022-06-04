@@ -1,7 +1,7 @@
 #include "cocos2d.h"
 #include "Gun.h"
 #include "Attribute.h"
-#include "HandGun.h"
+#include "SystemHeader.h"
 #include "GameScene.h"
 
 USING_NS_CC;
@@ -16,13 +16,18 @@ Gun* Gun::createGunWithPhysicsBody(const std::string& filename)
 	{
 		gunPtr->_physicsBody = PhysicsBody::createBox(gunPtr->getContentSize(), PhysicsMaterial(0.0f, 0.0f, 1.0f));
 		gunPtr->_physicsBody->setDynamic(true);
-
+		gunPtr->_physicsBody->setRotationEnable(false);
 		gunPtr->_physicsBody->setCategoryBitmask(GUN_CATEGORY_BITMASK);
 		gunPtr->_physicsBody->setCollisionBitmask(GUN_COLLISION_BITMASK);
 		gunPtr->_physicsBody->setContactTestBitmask(0xFFFFFFFF);
 
 		gunPtr->addComponent(gunPtr->_physicsBody);
-
+		gunPtr->attr.maxCapacity = 7;
+		gunPtr->bulletsLeft = 0;
+		gunPtr->attr.velocity = 2800.0f;
+		gunPtr->attr.recoilValue = 400.0f;
+		gunPtr->_firable = true;
+		gunPtr->setIsReloading(false);
 		gunPtr->autorelease();
 		return gunPtr;
 	}
@@ -66,33 +71,84 @@ void Gun::addBulletWithPhysicsBody(const std::string& filename)
 	return;
 }
 
-void Gun::fire()
+bool Gun::fire()
 {
-	Vec2 position = this->getPosition();
+	if (bulletsLeft > 0)
+	{
+		clock_t now = clock();
+		if (static_cast<double>(now - last) / CLOCKS_PER_SEC < attr.fireRate)
+			return false;
+		last = clock();
+		bulletsLeft--;
+		log("%d", bulletsLeft);
+		if (bulletsLeft == 0)
+		{
+			_firable = false;
+			log("cannot fire next");
+			if (_firable)
+				log("true1");
+			if (getFirable())
+				log("true2");
+		}
 
-	auto bulletSprite = Sprite::createWithSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("bullet"));
-	bulletSprite->setPosition(position);
-	bulletSprite->setScale(0.25f);
+		Vec2 position = this->getPosition();
 
-	bulletSprite->setTag(BULLET);
-	this->getScene()->addChild(bulletSprite);
+		auto bulletSprite = Sprite::createWithSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("bullet"));
+		bulletSprite->setPosition(position);
+		bulletSprite->setScale(0.25f);
 
-	auto bulletBody = PhysicsBody::createBox(bulletSprite->getContentSize(), PhysicsMaterial(20.0f, 1.0f, 1.0f));
-	bulletBody->setGravityEnable(false);
-	bulletSprite->addComponent(bulletBody);
+		bulletSprite->setTag(attr.damageValue);
+		this->getScene()->addChild(bulletSprite);
 
-	bulletSprite->getPhysicsBody()->setCollisionBitmask(BULLET_COLLISION_BITMASK);
-	bulletSprite->getPhysicsBody()->setCategoryBitmask(BULLET_CATEGORY_BITMASK);
-	bulletSprite->getPhysicsBody()->setContactTestBitmask(0xFFFFFFFF);
-	float bulletVelocity = 2800;
-	bulletBody->setVelocity({ (this->_flippedX ? -1 : 1) * bulletVelocity,0 });
-	auto emitter = ParticleFire::create();
-	emitter->setLife(0.1f);
-	emitter->setLifeVar(0.5f);
-	emitter->setDuration(0.1f);
-	emitter->setColor(Color3B::YELLOW);
-	emitter->setPosition(bulletBody->getPosition()+this->getContentSize());
-	addChild(emitter);
+		auto bulletBody = PhysicsBody::createBox(bulletSprite->getContentSize(), PhysicsMaterial(20.0f, 1.0f, 1.0f));
+		bulletBody->setGravityEnable(false);
+		bulletSprite->addComponent(bulletBody);
 
-	return;
+		bulletSprite->getPhysicsBody()->setCollisionBitmask(BULLET_COLLISION_BITMASK);
+		bulletSprite->getPhysicsBody()->setCategoryBitmask(BULLET_CATEGORY_BITMASK);
+		bulletSprite->getPhysicsBody()->setContactTestBitmask(0xFFFFFFFF);
+		//float bulletVelocity = 2800;
+		bulletBody->setVelocity({ (this->_flippedX ? -1 : 1) * attr.velocity,0 });
+		auto emitter = ParticleFire::create();
+		emitter->setLife(0.1f);
+		emitter->setLifeVar(0.5f);
+		emitter->setDuration(0.1f);
+		emitter->setColor(Color3B::YELLOW);
+		emitter->setPosition(bulletBody->getPosition() + this->getContentSize());
+		addChild(emitter);
+		return true;
+	}
+	else
+	{
+		log("fire when no bullet remaining");
+	}
+	return false;
 }
+void Gun::bulletReloading(float dt)
+{
+	log("enter the schedule function ");
+	setBullets(attr.maxCapacity);
+	
+	if (getIsReloading())
+	{
+		setIsReloading(false);
+	}
+	if (!getFirable())
+	{
+		_firable = true;
+	}
+	
+}
+void Gun::setIsReloading(bool isReloading)
+{
+	_isReloading = isReloading;
+}
+bool Gun::getIsReloading()
+{
+	return _isReloading;
+}
+bool Gun::getFirable()
+{
+	return _firable;
+}
+

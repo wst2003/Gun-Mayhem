@@ -1,6 +1,6 @@
 #include "cocos2d.h"
 #include "Attribute.h"
-
+#include "SystemHeader.h"
 USING_NS_CC;
 
 
@@ -37,4 +37,9 @@ std::string ActorInformation::toString()
 ActorInformation ActorInformation::toActorInformation(const std::string& s)
 {
 	return { 0,0,0 };
+}
+
+Vec2 ActorInformation::getPosition()
+{
+	return _position;
 }
