@@ -1,7 +1,7 @@
 #include "cocos2d.h"
 #include "Gun.h"
 #include "Attribute.h"
-//#include "HandGun.h"
+#include "SystemHeader.h"
 #include "GameScene.h"
 
 USING_NS_CC;
@@ -16,14 +16,14 @@ Gun* Gun::createGunWithPhysicsBody(const std::string& filename)
 	{
 		gunPtr->_physicsBody = PhysicsBody::createBox(gunPtr->getContentSize(), PhysicsMaterial(0.0f, 0.0f, 1.0f));
 		gunPtr->_physicsBody->setDynamic(true);
-
+		gunPtr->_physicsBody->setRotationEnable(false);
 		gunPtr->_physicsBody->setCategoryBitmask(GUN_CATEGORY_BITMASK);
 		gunPtr->_physicsBody->setCollisionBitmask(GUN_COLLISION_BITMASK);
 		gunPtr->_physicsBody->setContactTestBitmask(0xFFFFFFFF);
 
 		gunPtr->addComponent(gunPtr->_physicsBody);
 		gunPtr->attr.maxCapacity = 7;
-		gunPtr->bulletsLeft = 7;
+		gunPtr->bulletsLeft = 0;
 		gunPtr->attr.velocity = 2800.0f;
 		gunPtr->attr.recoilValue = 400.0f;
 		gunPtr->_firable = true;
@@ -71,10 +71,14 @@ void Gun::addBulletWithPhysicsBody(const std::string& filename)
 	return;
 }
 
-void Gun::fire()
+bool Gun::fire()
 {
 	if (bulletsLeft > 0)
-	{	
+	{
+		clock_t now = clock();
+		if (static_cast<double>(now - last) / CLOCKS_PER_SEC < attr.fireRate)
+			return false;
+		last = clock();
 		bulletsLeft--;
 		log("%d", bulletsLeft);
 		if (bulletsLeft == 0)
@@ -86,13 +90,14 @@ void Gun::fire()
 			if (getFirable())
 				log("true2");
 		}
+
 		Vec2 position = this->getPosition();
 
 		auto bulletSprite = Sprite::createWithSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("bullet"));
 		bulletSprite->setPosition(position);
 		bulletSprite->setScale(0.25f);
 
-		bulletSprite->setTag(BULLET);
+		bulletSprite->setTag(attr.damageValue);
 		this->getScene()->addChild(bulletSprite);
 
 		auto bulletBody = PhysicsBody::createBox(bulletSprite->getContentSize(), PhysicsMaterial(20.0f, 1.0f, 1.0f));
@@ -111,12 +116,13 @@ void Gun::fire()
 		emitter->setColor(Color3B::YELLOW);
 		emitter->setPosition(bulletBody->getPosition() + this->getContentSize());
 		addChild(emitter);
+		return true;
 	}
 	else
 	{
 		log("fire when no bullet remaining");
 	}
-	return;
+	return false;
 }
 void Gun::bulletReloading(float dt)
 {
@@ -145,3 +151,4 @@ bool Gun::getFirable()
 {
 	return _firable;
 }
+

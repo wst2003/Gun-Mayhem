@@ -2,6 +2,7 @@
 #include "cocos2d.h"
 #include "network/SocketIO.h"
 #include "RegisterOrLoginScene.h"
+#include "SystemHeader.h"
 
 USING_NS_CC;
 using namespace  cocos2d::network;

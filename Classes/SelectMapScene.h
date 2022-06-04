@@ -25,12 +25,13 @@ class SelectMapScene : public cocos2d::Layer
 public:
     static cocos2d::Scene* createScene();
     virtual bool init();
+    virtual void onEnterTransitionDidFinish();
     //std::vector<Sprite*>map_all;
     //std::vector<Sprite*>::iterator iter;
     void mapOneCallBack(Ref* r);    //选择第一张地图的回调函数
     CREATE_FUNC(SelectMapScene);
     std::map<int, std::string> map_int;
-   
+
 };
 
 #endif // __SelectMap_SCENE_H__

@@ -27,7 +27,7 @@ bool OptionScene::init()
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 	auto bg = Sprite::create("optionScene.png");
 	bg->setPosition(Vec2(visibleSize.width * 1 / 2, visibleSize.height * 1 / 2));
-	this->addChild(bg,0);
+	this->addChild(bg, 0);
 
 	onButtonMusic = MenuItemImage::create("ON_able.png", "ON_selected.png", "ON_un.png",
 		CC_CALLBACK_1(OptionScene::musicButtonOnCallBack, this));
@@ -36,9 +36,9 @@ bool OptionScene::init()
 	//this->addChild(offButtonMusic, 1, 124);
 	offButtonMusic->setEnabled(false);
 	auto mnMusic = Menu::create(onButtonMusic, offButtonMusic, NULL);
-	mnMusic->setPosition(Vec2(visibleSize.width * 1 / 7+70, visibleSize.height * 1 / 8+15));
+	mnMusic->setPosition(Vec2(visibleSize.width * 1 / 7 + 70, visibleSize.height * 1 / 8 + 15));
 	mnMusic->alignItemsHorizontally();
-	this->addChild(mnMusic,1);
+	this->addChild(mnMusic, 1);
 
 	onButtonSound = MenuItemImage::create("ON_able.png", "ON_selected.png", "ON_un.png",
 		CC_CALLBACK_1(OptionScene::soundButtonOnCallBack, this));
@@ -50,6 +50,24 @@ bool OptionScene::init()
 	mnSound->setPosition(Vec2(visibleSize.width * 1 / 7 + 260, visibleSize.height * 1 / 8 + 15));
 	mnSound->alignItemsHorizontally();
 	this->addChild(mnSound, 1);
+
+	//读取上次退出时，两按钮的状态
+	if (UserDefault::getInstance()->getBoolForKey(MUSIC_KEY)) {
+		onButtonMusic->setEnabled(true);
+		offButtonMusic->setEnabled(false);
+	}
+	else {
+		onButtonMusic->setEnabled(false);
+		offButtonMusic->setEnabled(true);
+	}
+	if (UserDefault::getInstance()->getBoolForKey(SOUND_KEY)) {
+		onButtonSound->setEnabled(true);
+		offButtonSound->setEnabled(false);
+	}
+	else {
+		onButtonSound->setEnabled(false);
+		offButtonSound->setEnabled(true);
+	}
 
 	auto backButton = MenuItemImage::create("back.png", "back_selected.png", "back.png",
 		CC_CALLBACK_1(OptionScene::backCallBack, this));
@@ -63,6 +81,8 @@ void OptionScene::musicButtonOnCallBack(Ref* r)
 	MenuItemImage* onButton = (MenuItemImage*)r;
 	offButtonMusic->setEnabled(true);
 	onButton->setEnabled(false);
+	UserDefault::getInstance()->setBoolForKey(MUSIC_KEY, false);
+	AudioEngine::stop(UserDefault::getInstance()->getIntegerForKey(MUSICID));
 }
 void OptionScene::musicButtonOffCallBack(Ref* r)
 {
@@ -70,6 +90,10 @@ void OptionScene::musicButtonOffCallBack(Ref* r)
 	MenuItemImage* offButton = (MenuItemImage*)r;
 	onButtonMusic->setEnabled(true);
 	offButton->setEnabled(false);
+	UserDefault::getInstance()->setBoolForKey(MUSIC_KEY, true);
+	int audioId = UserDefault::getInstance()->getIntegerForKey(MUSICID);
+	if (AudioEngine::getState(audioId) != AudioEngine::AudioState::PLAYING)
+		UserDefault::getInstance()->setIntegerForKey(MUSICID, AudioEngine::play2d(BACKGROUNDA, true));
 }
 void OptionScene::soundButtonOnCallBack(Ref* r)
 {
@@ -87,5 +111,6 @@ void OptionScene::backCallBack(Ref* r)
 {
 	Director::getInstance()->popScene();
 }
+
 
 

@@ -1,6 +1,7 @@
 #include "AppDelegate.h"
 #include  "StartGameScene.h"
-
+#include "AudioEngine.h"
+#include "SystemHeader.h"
 USING_NS_CC;
 
 static cocos2d::Size designResolutionSize = cocos2d::Size(1350, 900);
@@ -60,7 +61,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
     // create a scene. it's an autorelease object
     auto scene = StartGameScene::createScene();
     srand((unsigned int)time(NULL));
-
+    AudioEngine::preload(BACKGROUNDA);
     // run
     director->runWithScene(scene);
 

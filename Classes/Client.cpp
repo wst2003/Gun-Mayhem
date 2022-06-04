@@ -2,9 +2,7 @@
 #include "Client.h"
 #include "cocos2d.h"
 #include "network/SocketIO.h"
-
-#include"RankingScene.h"
-
+#include "SystemHeader.h"
 USING_NS_CC;
 using namespace  cocos2d::network;
 
@@ -14,7 +12,7 @@ bool Client::isLogin = false;
 
 Client::Client()
 {
-	serverIp = "http://192.168.2.104:3000/";
+	serverIp = "http://192.168.3.7:3000/";
 	//serverIp = "http://180.160.2.227:3000/";
 	_sioClient = SocketIO::connect(serverIp, *this);
 	_sioClient->on("getRegisterResult", CC_CALLBACK_2(Client::getRegisterResult, this));
@@ -33,7 +31,7 @@ Client* Client::getInstance()
 	return myClient;
 }
 
-bool Client::getIsRegister()
+bool Client::getIsRegister() 
 {
 	return isRegister;
 }
@@ -46,21 +44,21 @@ bool Client::getIsLogin()
 void Client::onConnect(cocos2d::network::SIOClient* client)
 {
 	log("HelloWorld::onConnect called");
-}
+ }
 void Client::onMessage(cocos2d::network::SIOClient* client, const std::string& data)
 {
 	log("HelloWorld::onMessage received: %s", data.c_str());
-};
+ };
 
 void Client::onClose(cocos2d::network::SIOClient* client)
 {
 	log("HelloWorld::onClose called");
-};
+ };
 
 void Client::onError(cocos2d::network::SIOClient* client, const std::string& data)
 {
 	log("HelloWorld::onError received: %s", data.c_str());
-};
+ };
 
 void Client::registerIDRequest(std::string ID)
 {
@@ -69,8 +67,8 @@ void Client::registerIDRequest(std::string ID)
 
 void Client::getRegisterResult(cocos2d::network::SIOClient* client, const std::string& reply)
 {
-	if (reply.compare("\"1\"") == 0) {
-		Client::isRegister = true;
+	if (reply.compare("\"1\"")==0) {
+		Client::isRegister =true;
 		if (Client::getIsRegister()) {
 			log("REGISTER");
 		}
@@ -80,6 +78,7 @@ void Client::getRegisterResult(cocos2d::network::SIOClient* client, const std::s
 		isRegister = false;
 		log("register failed!");
 	}
+	
 }
 
 void Client::loginRequest(std::string ID)
@@ -110,7 +109,7 @@ void Client::loginLegally(std::string ID)
 
 void Client::addFriendRequest(std::string ID)
 {
-	_sioClient->emit("getAddFriendRequest", { myID,ID });
+	_sioClient->emit("getAddFriendRequest", {myID,ID});
 }
 
 void Client::getAddFriendResult(cocos2d::network::SIOClient* client, const std::string& reply)
@@ -153,7 +152,6 @@ void Client::getTextFromFriend(cocos2d::network::SIOClient* client, const std::s
 
 void Client::readRankingRequest(const std::string& ID)
 {
-	RankingScene::rankingData.clear();
 	_sioClient->emit("getReadRankingRequest", ID);
 }
 
@@ -164,6 +162,6 @@ void Client::getRankingData(cocos2d::network::SIOClient* client, const std::stri
 	data.erase(data.end() - 1);
 	auto aID = data.substr(0, data.find_first_of('|'));
 	auto score = data.substr(data.find_first_of('|') + 1, data.length() - aID.length() - 1);
-
-	RankingScene::rankingData.push_back(aID + "  " + score);
+	log(aID.c_str());
+	log(score.c_str());
 }

@@ -2,7 +2,7 @@
 #include "cocos2d.h"
 #include "network/SocketIO.h"
 #include "ChatScene.h"
-
+#include "SystemHeader.h"
 USING_NS_CC;
 using namespace  cocos2d::network;
 
@@ -119,7 +119,6 @@ void ChatScene::sendTextCallBack(Ref* r)
 void ChatScene::updateNewTextFromFriend(float dt)
 {
 	if (Client::getInstance()->hasNewChatText) {
-		
 		this->chatText->setString(this->chatText->getString() + "\n"+ Client::getInstance()->friendID+":"
 			+ Client::getInstance()->textFromFriend);
 		Client::getInstance()->hasNewChatText = false;

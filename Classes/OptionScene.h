@@ -3,6 +3,7 @@
 #define __OPTION_SCENE_H__
 
 #include "cocos2d.h"
+#include "SystemHeader.h"
 USING_NS_CC;
 class OptionScene : public cocos2d::Layer
 {

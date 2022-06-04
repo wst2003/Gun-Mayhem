@@ -6,6 +6,7 @@
 #include"RankingScene.h"
 #include"OptionScene.h"
 #include"SelectMapScene.h"
+#include "SystemHeader.h"
 #include<cstring>
 USING_NS_CC;
 bool isLogin = false;
@@ -22,18 +23,9 @@ Scene* StartGameScene::createScene()
 
 	// return the scene
 	return scene;
-}/*
-void StartGameScene::onEnter()
-{
-	Layer::onEnter();
-	if (Client::getInstance()->getIsLogin()) {
-		loginStatusLabel->setString("Login!\n" + Client::getInstance()->myID);
-		isLogin = true;
-	}
-	else {
-		loginStatusLabel->setString("Not Logged in!");
-	}
-}*/
+}
+
+
 // on "init" you need to initialize your instance
 bool StartGameScene::init()
 {

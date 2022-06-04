@@ -1,7 +1,8 @@
 
 #include "cocos2d.h"
 #include "loseScene.h"
-
+#include "StartGameScene.h"
+#include "SystemHeader.h"
 USING_NS_CC;
 
 
@@ -30,8 +31,20 @@ bool loseScene::init()
 	label->setSystemFontSize(25);
 	this->addChild(label);
 
+
+	auto backButton = MenuItemImage::create("back.png", "back_selected.png","back.png", CC_CALLBACK_1(loseScene::backToMenu, this));
+	auto backToMenu = Menu::create(backButton, NULL);
+	backToMenu->setPosition(Vec2(visibleSize.width * 3 / 10, visibleSize.height * 1 / 8));
+	this->addChild(backToMenu, 1);
 	return true;
 
+}
+void loseScene::backToMenu(Ref* r)
+{
+	Director::getInstance()->popScene();
+	auto startGameScene = StartGameScene::createScene();
+	Director::getInstance()->pushScene(startGameScene);
+	return;
 }
 void loseScene::backCallBack(Ref* r)
 {

@@ -3,7 +3,9 @@
 #include "Gun.h"
 #include "Actor.h"
 #include "GameScene.h"
-
+#include "SystemHeader.h"
+#include "loseScene.h"
+#include "winScene.h"
 USING_NS_CC;
 #define SPEED_LEFT -400
 #define SPEED_RIGHT 400
@@ -32,6 +34,30 @@ Actor* Actor::createActorWithPhysicsBody(const std::string& filename)
 	return nullptr;
 }
 
+void Actor::initActor()
+{
+	
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+
+	std::string str_1 = "ID:" + getName();
+	nameLabel = Label::createWithTTF(str_1, "fonts/arial.ttf", 35);
+	nameLabel->setPosition(Vec2(visibleSize.width * (2 * ID + 1) / 8, visibleSize.height * 1 / 8 + 25));
+
+	std::string str_2 = "bulletsLeft:" + getGun()->getBullets();
+	bulletsLeftLabel = Label::createWithTTF(str_2, "fonts/arial.ttf", 35);
+	bulletsLeftLabel->setPosition(Vec2(_contentSize.width / 2, _contentSize.height + bulletsLeftLabel->getContentSize().height ));
+
+	std::string str_3 = "PlayerLives:" + getRemainingLive();
+	livesLeftLabel = Label::createWithTTF(str_3, "fonts/arial.ttf", 35);
+	livesLeftLabel->setPosition(Vec2(visibleSize.width * (2 * ID + 1) / 8, visibleSize.height * 1 / 8 - 25));
+
+	bloodBar = LoadingBar::create("bloodBar.png");
+	bloodBar->setPosition(Vec2(visibleSize.width * (2 * ID + 1) / 8, visibleSize.height * 1 / 8 - 50));
+	bloodBar->setDirection(LoadingBar::Direction::LEFT);
+	bloodBar->setPercent(getBloodLeft());
+	return;
+}
+
 //设置枪械
 void Actor::setGun(Gun* inputGun)
 {
@@ -44,15 +70,15 @@ void Actor::setGun(Gun* inputGun)
 		gun->getPhysicsBody()->setCategoryBitmask(0);
 	}
 	gun = inputGun;
+	gun->setVisible(true);
 	gun->getPhysicsBody()->setContactTestBitmask(0);
 	gun->getPhysicsBody()->setCollisionBitmask(0);
 	gun->getPhysicsBody()->setCategoryBitmask(0);
 
-	gun->setPosition(this->getPosition().x + gun->getContentSize().width, this->getPosition().y);
-//	gun->setPosition(1000, 1000);
+	gun->setPosition(this->getPosition().x + gun->getContentSize().width / 2 + this->getContentSize().width / 2, this->getPosition().y);
+
 	_joint = PhysicsJointFixed::construct(this->getPhysicsBody(), gun->getPhysicsBody(), this->getPosition());
-//	if(_joint==nullptr)
-		GameScene::physicsWorld->addJoint(_joint);
+	GameScene::physicsWorld->addJoint(_joint);
 
 	return;
 }
@@ -75,7 +101,7 @@ void Actor::moveOnGround(Vec2 speed)
 	_physicsBody->setVelocity(speed);
 	this->setFlippedX(speed.x < 0);
 	this->getGun()->setFlippedX(speed.x < 0);
-	this->getGun()->setPosition(this->getPosition().x + (speed.x > 0 ? 1 : -1) * this->getGun()->getContentSize().width, this->getPosition().y);
+	this->getGun()->setPosition(this->getPosition().x + (speed.x > 0 ? 1 : -1) * (gun->getContentSize().width / 2 + this->getContentSize().width / 2), this->getPosition().y);
 	PhysicsJointFixed* joint = PhysicsJointFixed::construct(this->getPhysicsBody(), this->getGun()->getPhysicsBody(), this->getPosition());
 	GameScene::physicsWorld->removeJoint(this->_joint, true);
 	this->getScene()->getPhysicsWorld()->addJoint(joint);
@@ -86,17 +112,15 @@ void Actor::moveOnGround(Vec2 speed)
 //上跳
 void Actor::jumpUp()
 {
-	auto speedX = _physicsBody->getVelocity().x;
+	auto speedX = _physicsBody->getVelocity().x + 10;
 	if (this->_jumpTime == 0 || this->_jumpTime == 1) 
 	{
-		//if (this->_isJumping)
-			//return;
-			log("jump");
-			this->_isJumping = true;
-			_physicsBody->setCollisionBitmask(ACTOR_CHANGED_COLLISION_BITMASK);
-			_physicsBody->setCategoryBitmask(ACTOR_CHANGED_CATEGORY_BITMASK);
-			_physicsBody->setVelocity({ speedX, SPEED_UP });
-			this->_jumpTime++;
+		log("jump");
+		this->_isJumping = true;
+		_physicsBody->setCollisionBitmask(ACTOR_CHANGED_COLLISION_BITMASK);
+		_physicsBody->setCategoryBitmask(ACTOR_CHANGED_CATEGORY_BITMASK);
+		_physicsBody->setVelocity({ speedX, SPEED_UP });
+		this->_jumpTime++;
 		
 	}
 	return;
@@ -126,19 +150,27 @@ void Actor::fallOnGroundEffect()
 }
 
 //受伤的效果
-void Actor::damagedEffect()
+void Actor::damagedEffect(int damage)
 {
 	auto emitter = ParticleExplosion::create();
 	emitter->setLife(0.1f);
 	emitter->setLifeVar(0.5f);
 	emitter->setPosition(this->getPosition());
 	this->getScene()->addChild(emitter);
+
+	_bloodLeft -= damage;
+	_bloodLeft = std::max(_bloodLeft, 0);
 }
 
 //死亡的效果
 void Actor::killedEffect()
 {
 
+}
+
+cocos2d::ui::LoadingBar* Actor::getBloodBar()
+{
+	return bloodBar;
 }
 
 //活动动画
@@ -155,9 +187,8 @@ void Actor::stopAnimation()
 
 void Actor::fire()
 {
-	gun->fire();
-
-	this->_physicsBody->setVelocity({ (this->_flippedX ? 1 : -1) * 400.0f,_physicsBody->getVelocity().y });
+	if(gun->fire())
+		this->_physicsBody->setVelocity({ (this->_flippedX ? 1 : -1) * 400.0f,_physicsBody->getVelocity().y });
 
 	return;
 }
@@ -199,6 +230,7 @@ int Actor::getJumpTime()
 void Actor::setIsIntheAir(bool isInTheAir)
 {
 	_isInTheAir = isInTheAir;
+	return;
 }
 bool Actor::getIsIntheAir()
 {
@@ -212,4 +244,163 @@ int Actor::getRemainingLive()
 void Actor::setRemainingLive(int num)
 {
 	_remainingLive = num;
+	return;
+}
+
+
+void Actor::setActorInformation()
+{
+	actorInformation.changePosition(this->getPosition());
+}
+
+void Actor::changeBitMask()
+{
+	if (getPhysicsBody()->getVelocity().y < 0)
+	{
+		if (getIsJumping()) {
+			setIsJumping(false);
+
+			getPhysicsBody()->setCollisionBitmask(1 << ID);
+			getPhysicsBody()->setCategoryBitmask(1 << ID);
+
+
+		}
+		if (getIsDowning())
+		{
+			getPhysicsBody()->setCollisionBitmask(ACTOR_CHANGED_COLLISION_BITMASK);
+			getPhysicsBody()->setCategoryBitmask(ACTOR_CHANGED_CATEGORY_BITMASK);
+			setIsDowning(false);
+		}
+
+	}
+	else if (getPhysicsBody()->getVelocity().y < 10.0f &&
+		getPhysicsBody()->getVelocity().y > -10.0f)
+	{
+		setJumpTime(0);
+		if (getIsJumping())
+			setIsJumping(false);
+		if (getIsDowning())
+			setIsDowning(false);
+		if (getIsIntheAir())
+		{
+			setIsIntheAir(false);
+			log("not in the air");
+		}
+	}
+	else if (getPhysicsBody()->getVelocity().y > 10.0f ||
+		getPhysicsBody()->getVelocity().y < -10.0f)
+	{
+		setIsIntheAir(true);
+		log("is in the air");
+	}
+
+}
+
+void Actor::renewBitMask()
+{
+	if (getIsDowning())
+	{
+		if (getPhysicsBody()->getVelocity().y < 0)
+		{
+			log("separate current ground");
+			setIsDowning(false);
+			getPhysicsBody()->setCollisionBitmask(1 << ID);
+			getPhysicsBody()->setCategoryBitmask(1 << ID);
+		}
+	}
+	return;
+}
+
+void Actor::contactGround()
+{
+	Vec2 currentVelovity = getPhysicsBody()->getVelocity();
+	if (currentVelovity.y <= 0)
+		setJumpTime(0);
+	if (getIsJumping())
+	{
+		if (currentVelovity.y > 0)
+		{
+			getPhysicsBody()->setCollisionBitmask(ACTOR_CHANGED_COLLISION_BITMASK);
+			getPhysicsBody()->setCategoryBitmask(ACTOR_CHANGED_CATEGORY_BITMASK);
+		}
+		else
+		{
+			getPhysicsBody()->setCollisionBitmask(1 << ID);
+			getPhysicsBody()->setCategoryBitmask(1 << ID);
+			setIsJumping(false);
+		}
+	}
+	if (getIsDowning())
+	{
+		log("downing");
+		getPhysicsBody()->setCollisionBitmask(ACTOR_CHANGED_COLLISION_BITMASK);
+		getPhysicsBody()->setCategoryBitmask(ACTOR_CHANGED_CATEGORY_BITMASK);
+	}
+	else
+	{
+		getPhysicsBody()->setCollisionBitmask(1 << ID);
+		getPhysicsBody()->setCategoryBitmask(1 << ID);
+
+		setIsDowning(false);
+	}
+}
+
+int Actor::getID()
+{
+	return ID;
+}
+
+void Actor::setID(int id)
+{
+	ID = id;
+}
+
+void Actor::reLive(bool flag)
+{
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	if (this->getPosition().y < 0 || getBloodLeft() == 0)
+	{
+		int currentLive = this->getRemainingLive() - 1;
+		this->setGun(this->getGun());
+		if (currentLive == 0)
+		{
+			auto scene = flag ? loseScene::createScene() : winScene::createScene();
+			//			log("you lose");//跳转
+			Director::getInstance()->pushScene(scene);
+		}
+		this->setRemainingLive(currentLive);
+		this->setBloodLeft(100);
+		log("%d", currentLive);
+		this->setPosition(visibleSize.width / 4, visibleSize.height + this->getContentSize().height);
+
+		this->getPhysicsBody()->setVelocity({ 0,0 });
+	}
+	return;
+}
+int Actor::getBloodLeft()
+{
+	return _bloodLeft;
+}
+
+void Actor::setBloodLeft(int num)
+{
+	_bloodLeft = num;
+}
+
+void Actor::renewBrand()
+{
+	char bullets[10] = {};
+	itoa(this->getGun()->getBullets(), bullets, 10);
+	std::string str_sub_1 = bullets;
+	std::string str_1 = str_sub_1;
+	bulletsLeftLabel->setString(str_1);
+
+	char player[10] = {};
+	itoa(this->getRemainingLive(), player, 10);
+	std::string str_sub_2 = player;
+	std::string str_2 = "PlayerLives:" + str_sub_2;
+	livesLeftLabel->setString(str_2);
+
+	bloodBar->setPercent(_bloodLeft);
+	return;
 }
