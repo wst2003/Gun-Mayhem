@@ -2,6 +2,7 @@
 #include<cstring>
 #include"GameScene.h"
 #include "SystemHeader.h"
+#include "CreateRoomScene.h"
 USING_NS_CC;
 
 int numberOfMap = 111;
@@ -115,7 +116,7 @@ void SelectMapScene::backToMenuCallBack(Ref* r)
 void SelectMapScene::startCallBack(Ref* r)
 {
 	UserDefault::getInstance()->setIntegerForKey(MAPID, numberOfMap);
-	auto scene = GameScene::createScene();
+	auto scene = CreateRoomScene::createScene();
 	Director::getInstance()->pushScene(scene);
 }
 

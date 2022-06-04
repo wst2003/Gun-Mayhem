@@ -30,7 +30,8 @@ void ActorInformation::changeGunType(int gunType)
 //将人物信息转换为string
 std::string ActorInformation::toString()
 {
-	return "666";
+	return Value(_position.x).asString()+"|"+ Value(_position.y).asString() + "|"+Value(_isFire).asString()+"|"
+		+Value(_gunType).asString();
 }
 
 //将字符串转换为人物信息

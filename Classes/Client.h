@@ -28,6 +28,9 @@ public:
 	void readRankingRequest(const std::string& ID);
 	void getRankingData(cocos2d::network::SIOClient* client, const std::string& text);
 
+	void inviteFriend(const std::string& ID);
+	void getInviteFriend(cocos2d::network::SIOClient* client, const std::string& ID);
+
 	static bool getIsRegister();
 	static bool getIsLogin();
 	std::string myID;

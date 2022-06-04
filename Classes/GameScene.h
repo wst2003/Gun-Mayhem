@@ -42,6 +42,7 @@ private:
 	std::vector<GunAttribute>gunAttribute = { HANDGUN_ARR, SNIPERGUN_ARR, ARGUN_ARR };
 
 	clock_t _lastTime;
+	
 
 	bool canPlayerSet = 0;
 	bool canEnemySet = 0;

@@ -253,6 +253,8 @@ void Actor::setActorInformation()
 	actorInformation.changePosition(this->getPosition());
 }
 
+
+
 void Actor::changeBitMask()
 {
 	if (getPhysicsBody()->getVelocity().y < 0)

@@ -10,6 +10,8 @@
 #include "SystemHeader.h"
 #include "ui/UIScrollView.h"
 
+#include <fstream>
+
 
 USING_NS_CC;
 
@@ -38,6 +40,9 @@ bool GameScene::init()
 	{
 		return false;
 	}
+
+	
+
 	//Ìí¼Óµ÷¶ÈÆ÷
 	this->scheduleUpdate();
 
@@ -298,7 +303,10 @@ void GameScene::update(float dt)
 	_enemy->getPlayerInformation(_player);
 	_enemy->actByAI();
 
-
+	
+	
+	
+	
 	return;
 }
 

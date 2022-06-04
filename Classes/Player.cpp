@@ -68,9 +68,14 @@ void Player::actByMouse(std::map<EventMouse::MouseEventType, bool>& mouseMap)
 {
 	if (mouseMap[MOUSE_DOWN] && this->gun->getFirable())
 	{
+		/*ÍõÊ«ÌÚÌí¼Ó*/
+		this->actorInformation.changeIsFire(true);
 		this->fire();
 	}
-	
+	else 
+	{
+		this->actorInformation.changeIsFire(false);
+	}
 	return;
 }
 
