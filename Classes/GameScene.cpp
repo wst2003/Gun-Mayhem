@@ -1,5 +1,4 @@
 #include "cocos2d.h"
-//#include "HandGun.h"
 #include "StartGameScene.h"
 #include "Player.h"
 #include "Actor.h"
@@ -8,9 +7,14 @@
 #include "Gun.h"
 #include"winScene.h"
 #include"loseScene.h"
+#include "SystemHeader.h"
+#include "ui/UIScrollView.h"
+
+
 USING_NS_CC;
 
 PhysicsWorld* GameScene::physicsWorld = nullptr;
+Sprite* GameScene::_box = nullptr;
 
 //创建场景
 Scene* GameScene::createScene()
@@ -18,7 +22,7 @@ Scene* GameScene::createScene()
 
 	auto scene = Scene::createWithPhysics();	//物理引擎
 	scene->getPhysicsWorld()->setGravity({ 0,-2000 });
-	scene->getPhysicsWorld()->setSubsteps(3.0f);
+	scene->getPhysicsWorld()->setSubsteps(10.0f);
 	scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
 	physicsWorld = scene->getPhysicsWorld();
 	auto gameLayer = GameScene::create();
@@ -41,91 +45,65 @@ bool GameScene::init()
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	auto origin = Director::getInstance()->getVisibleOrigin();
 
-	/*--------------------------------------------------*/
-	//创建4个平台
-	float pos[4][2] = { visibleSize.width / 4 ,visibleSize.height / 4 ,visibleSize.width * 3 / 4 ,visibleSize.height / 4 ,visibleSize.width / 4,visibleSize.height * 2 / 4 ,visibleSize.width * 3 / 4,visibleSize.height * 2 / 4 };
-	for (int i = 0; i < 4; i++)
-	{
-		auto stoneSprite = Sprite::create("ground.jpg");
-		stoneSprite->setScaleX(4.0f);
-		stoneSprite->setScaleY(0.1f);
-		stoneSprite->setPosition(origin.x + pos[i][0], origin.y + pos[i][1]);
+	initMap();
 
-		auto stoneBody = PhysicsBody::createBox(stoneSprite->getContentSize(), PhysicsMaterial(0.1f, 0.0f, 1.0f));
-		stoneBody->setDynamic(false);
-		stoneSprite->setTag(FOOTSTEP);
-		stoneSprite->setPhysicsBody(stoneBody);
-		this->addChild(stoneSprite);
+	auto box = Sprite::create("box.png");
+	_box = box;
+	_box->setVisible(false);
+	auto boxBody = PhysicsBody::createBox(_box->getContentSize(), PhysicsMaterial(10.0f, 0.0f, 1.0f));
+	_box->addComponent(boxBody);
+	boxBody->setDynamic(true);
+	boxBody->setRotationEnable(false);
 
-		stoneBody->setCategoryBitmask(FOOTSTEP_CATEGORY_BITMASK);
-		stoneBody->setCollisionBitmask(FOOTSTEP_COLLISION_BITMASK);
-		stoneSprite->getPhysicsBody()->setContactTestBitmask(0xFFFFFFFF);
-	}
-	/*--------------------------------------------------*/
+	box->setTag(BOX);
+	addChild(_box);
 
-	// 创建一个物体对象 EdgeBox是一个空心的矩形 相当于边框效果 
-	auto node = Node::create();
-	auto bound = PhysicsBody::createEdgeBox(Size(visibleSize.width, visibleSize.height * 3 / 2), PhysicsMaterial(0.1f, 0.0f, 1.0f));
-	bound->setContactTestBitmask(0xFFFFFFFF);
-	bound->setCategoryBitmask(EDGE_CATEGORY_BITMASK);
-	bound->setCollisionBitmask(EDGE_COLLISION_BITMASK);
-	node->setPhysicsBody(bound);
-	node->setPosition(Point(visibleSize.width / 2, visibleSize.height / 2));
-	this->addChild(node);
 
 	//
-	auto gun=Gun::createGunWithPhysicsBody("369.png");
-	handGun = gun;
-	handGun->setPosition(visibleSize.width / 4 + 300, visibleSize.height);
-	handGun->setTag(GUN);
-	//addChild(gun);
-	handGun->addBulletWithPhysicsBody("bullet.png");
+	auto enemyGun=Gun::createGunWithPhysicsBody(HANDGUN_FILENAME);
+	enemyGun->setPosition(visibleSize.width / 4 + 300, visibleSize.height);
+	enemyGun->setTag(GUN);
+	addChild(enemyGun);
+	enemyGun->addBulletWithPhysicsBody("bullet.png");
+	enemyGun->setAttribute(HANDGUN_ARR);
+	enemyGun->setBullets(enemyGun->getAttribute().maxCapacity);
 
-	//this->handGun = gun;
-	//this->arGun = gun;
-	//this->sniperGun = gun;
-
-	randomFallGun("369.png", { visibleSize.width / 4 + 300, visibleSize.height });
+	auto playerGun = Gun::createGunWithPhysicsBody(HANDGUN_FILENAME);
+	playerGun->setPosition(visibleSize.width / 4 + 300, visibleSize.height);
+	playerGun->setTag(GUN);
+	addChild(playerGun);
+	playerGun->addBulletWithPhysicsBody("dbullet.png");
+	playerGun->setAttribute(HANDGUN_ARR);
+	playerGun->setBullets(playerGun->getAttribute().maxCapacity);
+	
+	randomFallGun({ visibleSize.width * 4 / 5, 290 });
 
 	//人物
-	auto player = Player::createActorWithPhysicsBody("172.png");
+	auto player = Player::createWithActor(Actor::createActorWithPhysicsBody("playerA.png"));
 	player->setPosition(visibleSize.width / 4, visibleSize.height + player->getContentSize().height);
-	player->setTag(ACTOR);
 	player->setRemainingLive(3);
 	addChild(player);
-	player->getPhysicsBody()->setCategoryBitmask(PLAYER_CATEGORY_BITMASK);
-	player->getPhysicsBody()->setCollisionBitmask(PLAYER_COLLISION_BITMASK);
-	player->setGun(handGun);
+	player->setGun(playerGun);
+	player->setID(0);
+	player->initActor();
 	this->_player = player;
 
 	//敌人
-	auto enemy = AIEnemy::createActorWithPhysicsBody("166.png");
+	auto enemy = AIEnemy::createWithActor(Actor::createActorWithPhysicsBody("playerB.png"));
 	enemy->setPosition(visibleSize.width * 3 / 4, visibleSize.height + enemy->getContentSize().height);
-	enemy->setTag(ACTOR);
 	enemy->setRemainingLive(5);
 	addChild(enemy);
-	enemy->getPhysicsBody()->setCategoryBitmask(ENEMY_CATEGORY_BITMASK);
-	enemy->getPhysicsBody()->setCollisionBitmask(ENEMY_COLLISION_BITMASK);
-	enemy->getPhysicsBody()->setContactTestBitmask(0xFFFFFFFF);
 	this->_enemy = enemy;
+	enemy->setGun(enemyGun);
+	enemy->setID(3);
+	enemy->initActor();
+
+	createBrand(_enemy);
+	createBrand(_player);
 
 	//鼠标监听器
 	auto myMouseListener = EventListenerMouse::create();
 	myMouseListener->onMouseDown = [=](EventMouse* event) {
-		//保证单发
-		if (!_mouseMap[MOUSE_DOWN]&&this->handGun->getFirable())
-		{
-			_player->fire();
-		}
-		else if (!_mouseMap[MOUSE_DOWN] && !this->handGun->getIsReloading())
-		{
-	        log(" reload");
-			this->handGun->setIsReloading(true);
-			this->scheduleOnce(CC_SCHEDULE_SELECTOR(GameScene::bulletsReloading), 1.0f);
-		}
-		else if(!_mouseMap[MOUSE_DOWN] && this->handGun->getIsReloading()){
-			log("is loading");
-		}
 		_mouseMap[MOUSE_DOWN] = true;
 		_mouseMap[MOUSE_UP] = false;
 	};
@@ -136,22 +114,14 @@ bool GameScene::init()
 	};
 
 	myMouseListener->onMouseUp = [=](EventMouse* event) {
-		_mouseMap[MOUSE_DOWN] = true;
 		_mouseMap[MOUSE_DOWN] = false;
-
+		_mouseMap[MOUSE_UP] = true;
 	};
 
 	//键盘监听器
 	auto listener = EventListenerKeyboard::create();
 	listener->onKeyPressed = [=](EventKeyboard::KeyCode keyCode, Event* event) {
 		_keyMap[keyCode] = true;
-		if (keyCode == UP_KEY || keyCode == W_KEY)
-			_player->jumpUp();
-		if ((keyCode == DOWN_KEY|| keyCode == S_KEY) && !_player->getIsIntheAir())
-		{
-			log("is down");
-			_player->jumpDown();
-		}
 	};
 
 	listener->onKeyReleased = [=](EventKeyboard::KeyCode keyCode, Event* event) {
@@ -162,136 +132,173 @@ bool GameScene::init()
 	//碰撞监听器
 	auto contactListener = EventListenerPhysicsContact::create();
 	contactListener->onContactBegin = CC_CALLBACK_1(GameScene::responseContact, this);
+	contactListener->onContactSeparate=CC_CALLBACK_1(GameScene::responseSeparate, this);
 
 	//添加监听器
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(contactListener, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(myMouseListener, this); 
-	auto labelBulletLeft=Label::createWithTTF("bulletsLeft:7 ", "fonts/Arial.ttf", 35);
-	labelBulletLeft->setPosition(Vec2(visibleSize.width * 1 / 7, visibleSize.height * 1 / 7));
-	this->addChild(labelBulletLeft,1,456);
-
-	auto labelPlayerLive= Label::createWithTTF("PlayerLives:3 ", "fonts/Arial.ttf", 35);
-	labelPlayerLive->setPosition(Vec2(visibleSize.width * 1 / 7, visibleSize.height * 1 / 7-25));
-	this->addChild(labelPlayerLive,1,457);
-
-	auto labelenemyrLive = Label::createWithTTF("enemyrLives:5 ", "fonts/Arial.ttf", 35);
-	labelenemyrLive->setPosition(Vec2(visibleSize.width * 1 / 7, visibleSize.height * 1 / 7 - 45));
-	this->addChild(labelenemyrLive,1,458);
 
 	return true;
 }
 
+void GameScene::initMap()
+{
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	auto origin = Director::getInstance()->getVisibleOrigin();
+
+	//创建平台
+	switch (UserDefault::getInstance()->getIntegerForKey(MAPID)) {
+		case 111:
+			map = Sprite::create("map1.png");
+			createGround(Vec2(660, 290), 1332);
+			createGround(Vec2(400, 510), 413);
+			createGround(Vec2(400, 647), 413);
+			createGround(Vec2(900, 438), 426);
+			createGround(Vec2(900, 575), 426);
+			break;
+		case 112:
+			map = Sprite::create("map2.png");
+			createGround(Vec2(675, 720), 1045);
+			createGround(Vec2(675, 140), 1045);
+			createGround(Vec2(675, 438), 515);
+			createGround(Vec2(297, 577), 420);
+			createGround(Vec2(297, 286), 420);
+			createGround(Vec2(1076, 577), 420);
+			createGround(Vec2(1076, 286), 420);
+			break;
+		case 113:
+			map = Sprite::create("map3.png");
+			createGround(Vec2(675, 237), 1350);
+			createGround(Vec2(190, 350), 225);
+			createGround(Vec2(190, 490), 225);
+			createGround(Vec2(1150, 350), 225);
+			createGround(Vec2(1150, 490), 225);
+			break;
+		case 114:
+			map = Sprite::create("map4.png");
+			createGround(Vec2(175, 647), 255);
+			createGround(Vec2(610, 647), 272);
+			createGround(Vec2(1082, 650), 260);
+			createGround(Vec2(400, 510), 182);
+			createGround(Vec2(890, 540), 176);
+			createGround(Vec2(163, 395), 262);
+			createGround(Vec2(687, 400), 180);
+			createGround(Vec2(1180, 410), 245);
+			createGround(Vec2(520, 290), 178);
+			createGround(Vec2(865, 280), 178);
+			createGround(Vec2(188, 140), 320);
+			createGround(Vec2(540, 140), 260);
+			createGround(Vec2(880, 140), 260);
+			createGround(Vec2(1215, 140), 245);
+			break;
+		default:
+			break;
+	}
+	map->setScaleX(visibleSize.width / map->getContentSize().width);
+	map->setScaleY(visibleSize.height / map->getContentSize().height);
+	map->setPosition(visibleSize / 2);
+	this->addChild(map);
+
+	//创建一个物体对象 EdgeBox是一个空心的矩形 相当于边框效果 
+	auto node = Node::create();
+	auto bound = PhysicsBody::createEdgeBox(Size(visibleSize.width, visibleSize.height * 3 / 2), PhysicsMaterial(0.1f, 0.0f, 1.0f));
+	bound->setContactTestBitmask(0xFFFFFFFF);
+	bound->setCategoryBitmask(EDGE_CATEGORY_BITMASK);
+	bound->setCollisionBitmask(EDGE_COLLISION_BITMASK);
+	node->setPhysicsBody(bound);
+	node->setTag(EDGE);
+	node->setPosition(Point(visibleSize.width / 2, visibleSize.height / 2));
+	this->addChild(node);
+	/*--------------------------------------------------*/
+}
+void GameScene::createGround(Vec2 pos, float length)
+{
+	auto stoneSprite = Sprite::create("ground.jpg");
+	stoneSprite->setScaleX(length / stoneSprite->getContentSize().width);
+	stoneSprite->setScaleY(0.1f);
+	stoneSprite->setPosition(pos);
+	stoneSprite->setVisible(false);
+
+	auto stoneBody = PhysicsBody::createBox(stoneSprite->getContentSize(), PhysicsMaterial(0.1f, 0.0f, 1.0f));
+	stoneBody->setDynamic(false);
+	stoneSprite->setTag(FOOTSTEP);
+	stoneSprite->setPhysicsBody(stoneBody);
+	this->addChild(stoneSprite);
+
+	stoneBody->setCategoryBitmask(FOOTSTEP_CATEGORY_BITMASK);
+	stoneBody->setCollisionBitmask(FOOTSTEP_COLLISION_BITMASK);
+	stoneSprite->getPhysicsBody()->setContactTestBitmask(0xFFFFFFFF);
+
+	auto spaySprite = Sprite::create("ground.jpg");
+	auto spayEdge = PhysicsBody::createBox(stoneSprite->getContentSize());
+	spaySprite->setPhysicsBody(spayEdge);
+	spayEdge->setDynamic(false);
+	spaySprite->setPosition(Vec2(pos.x,pos.y-10.0f));
+	spaySprite->setScaleX(length / stoneSprite->getContentSize().width*1.2);
+	spaySprite->setScaleY(0.1f);
+	spayEdge->setCategoryBitmask(0xFFFFFFFF);
+	spayEdge->setCollisionBitmask(0);
+	spayEdge->setContactTestBitmask(0xFFFFFFFF);
+	spaySprite->setTag(SPAY);
+	spaySprite->setVisible(false);
+	this->addChild(spaySprite);
+
+	return;
+}
+
+void GameScene::createBrand(Actor* actor)
+{
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	addChild(actor->nameLabel, 2, BRAND_NAME + actor->getID());
+	addChild(actor->livesLeftLabel, 2, BRAND_LIFELEFT + actor->getID());
+	actor->addChild(actor->bulletsLeftLabel, 2, BRAND_BULLETLEFT + actor->getID());
+	addChild(actor->getBloodBar(), 2, BRAND_BLOODPERCENT + actor->getID());
+	return;
+}
 //
 void GameScene::update(float dt)
 {
-	Label* labelbulletsleft = (Label*)this->getChildByTag(456);
-	char bullets[10] = {};
-	itoa(handGun->getBullets(),bullets, 10);
-	std::string str_sub_1 = bullets;
-	std::string str_1  = "bulletsLeft:"+	str_sub_1;
-	labelbulletsleft->setString(str_1);
+	_player->renewBrand();
+	_enemy->renewBrand();
 
-	Label* playerliveleft = (Label*)this->getChildByTag(457);
-	char player[10] = {};
-	itoa(_player->getRemainingLive(), player, 10);
-	std::string str_sub_2  =player;
-	std::string str_2 = "PlayerLives:" + str_sub_2;
-	playerliveleft->setString(str_2);
+	clock_t now = clock();
+	if (now - _lastTime > 10000.0f)
+	{
+		randomFallGun({ 1.0f * (rand() % (static_cast<int>(Director::getInstance()->getVisibleSize().width))),
+			1.0f * (std::max(rand() % static_cast<int>(Director::getInstance()->getVisibleSize().height / 2),0) +static_cast<int>(Director::getInstance()->getVisibleSize().height / 2)) });
+		_lastTime = now;
+	}
 
-	Label* enemyliveleft = (Label*)this->getChildByTag(458);
-	char enemy[10] = {};
-	itoa(_enemy->getRemainingLive(), enemy, 10);
-	std::string str_sub_3 = enemy;
-	std::string str_3 = "enemyrLives:" + str_sub_3;
-	enemyliveleft->setString(str_3);
+	//刷新枪的状态
+	if (canPlayerSet)
+	{
+		_player->setGun(_player->getGun());
+		canPlayerSet = false;
+	}
+	if (canEnemySet)
+	{
+		_enemy->setGun(_enemy->getGun());
+		canEnemySet = false;
 
-	auto visibleSize = Director::getInstance()->getVisibleSize();
-	if (_keyMap[LEFT_KEY] || _keyMap[A_KEY])
-		_player->moveOnGround({ -400,_player->getPhysicsBody()->getVelocity().y });
-		
-	if (_keyMap[RIGHT_KEY] || _keyMap[D_KEY])
-		_player->moveOnGround({ 400,_player->getPhysicsBody()->getVelocity().y });
-    //this->
+	}
+
+
+	_player->actByKeyBoard(_keyMap);
+	_player->actByMouse(_mouseMap);
+
 	//重生机制
-	if (_player->getPosition().y < 0)
-	{
-		int currentLive = _player->getRemainingLive()-1;
-		if (currentLive==0)
-		{
-			auto _loseScene = loseScene::createScene();
-			log("you lose");//跳转
-			Director::getInstance()->pushScene(_loseScene);
-		}
-        _player->setRemainingLive(currentLive);
-		log("%d", currentLive);
-		_player->setPosition(visibleSize.width / 4, visibleSize.height + _player->getContentSize().height);
-		
-		_player->getPhysicsBody()->setVelocity({ 0,0 });
-	}
-	if (_enemy->getPosition().y < 0)
-	{
-		int currentLive = _enemy->getRemainingLive() - 1;
-		if (currentLive == 0)
-		{
-
-			auto _winScene = winScene::createScene();
-			log("you win");//跳转
-			Director::getInstance()->pushScene(_winScene);
-		}
-		_enemy->setRemainingLive(currentLive);
-		log("%d", currentLive);
-		_enemy->setPosition(visibleSize.width * 3 / 4, visibleSize.height + _enemy->getContentSize().height);
-		_enemy->getPhysicsBody()->setVelocity({ 0,0 });
-	}
-
-	//无遮挡的向上跳跃/向下跳跃/二段跳判别的保险，判断人物的状态并且储存到其参数中
-	/*
-	if (_player->getPhysicsBody()->getVelocity().y > 10 &&
-		_player->getPhysicsBody()->getVelocity().y < 50)
-	{
-		log("change v");
-		auto speedX = _player->getPhysicsBody()->getVelocity().x;
-		_player->getPhysicsBody()->setVelocity(Vec2(speedX,-50));
-	}*/
-	if (_player->getPhysicsBody()->getVelocity().y < 0) 
-	{
-		if (_player->getIsJumping()) {
-			_player->setIsJumping(false);
-
-			_player->getPhysicsBody()->setCollisionBitmask(PLAYER_COLLISION_BITMASK);
-			_player->getPhysicsBody()->setCategoryBitmask(PLAYER_CATEGORY_BITMASK);
+	_player->reLive(true);
+	_enemy->reLive();
 
 
-		}
-		if(_player->getIsDowning()) 
-		{
-			_player->getPhysicsBody()->setCollisionBitmask(ACTOR_CHANGED_COLLISION_BITMASK);
-			_player->getPhysicsBody()->setCategoryBitmask(ACTOR_CHANGED_CATEGORY_BITMASK);
-			_player->setIsDowning(false);
-		}
-		
-	}
-	else if (_player->getPhysicsBody()->getVelocity().y < 10.0f &&
-		_player->getPhysicsBody()->getVelocity().y > -10.0f)
-	{
-		_player->setJumpTime(0);
-		if (_player->getIsJumping())
-			_player->setIsJumping(false);
-		if (_player->getIsDowning())
-			_player->setIsDowning(false);
-		if (_player->getIsIntheAir())
-		{
-			_player->setIsIntheAir(false);
-			log("not in the air");
-		}
-	}
-	else if (_player->getPhysicsBody()->getVelocity().y>10.0f|| 
-		_player->getPhysicsBody()->getVelocity().y<-10.0f)
-	{
-		_player->setIsIntheAir(true);
-		log("is in the air");
-	}
+	_player->changeBitMask();
+	_enemy->changeBitMask();
+	_player->setActorInformation();
+	_enemy->getPlayerInformation(_player);
+	_enemy->actByAI();
+
+
 	return;
 }
 
@@ -301,193 +308,205 @@ bool GameScene::responseContact(PhysicsContact& contact)
 	auto nodeA = contact.getShapeA()->getBody()->getNode();
 	auto nodeB = contact.getShapeB()->getBody()->getNode();
 
+
 	if (nodeA && nodeB)
 	{
-		if (nodeA->getTag() == BULLET )
+		if (nodeA->getTag() == SPAY && nodeB->getTag() == ACTOR ||
+			(nodeB->getTag() == SPAY && nodeA->getTag() == ACTOR))
 		{
-			if(nodeB->getTag()!=GUN)
+			_player->getPhysicsBody()->setCollisionBitmask(ACTOR_CHANGED_COLLISION_BITMASK);
+			_player->getPhysicsBody()->setCategoryBitmask(ACTOR_CHANGED_CATEGORY_BITMASK);
+			log("spay works");
+			return true;
+		}
+		if (nodeA->getTag() <= BULLET)
+		{
+			int damage = nodeA->getTag();
+			if (nodeB->getTag() != GUN)
 				nodeA->removeFromParentAndCleanup(true);
-			if (nodeB->getTag() == ACTOR)
-				dynamic_cast<Actor*>(nodeB)->damagedEffect();
+			if (nodeB->getTag() == PLAYER || nodeB->getTag() == ENEMY)
+			{
+				Actor* actor = dynamic_cast<Actor*>(nodeB);
+				actor->damagedEffect(damage);
+			}
 
 			return true;
 		}
-		if (nodeB->getTag() == BULLET)
+		if (nodeB->getTag() <= BULLET)
 		{
-			if(nodeA->getTag()!=GUN)
+			int damage = nodeB->getTag();
+			if (nodeA->getTag() != GUN)
 				nodeB->removeFromParentAndCleanup(true);
-			if (nodeA->getTag() == ACTOR)
-				dynamic_cast<Actor*>(nodeA)->damagedEffect();
-
-			return true;
-		}
-		if (nodeA->getTag() == ACTOR && nodeB->getTag() == GUN)
-		{
-			log("666");
-//			nodeB->removeFromParentAndCleanup(true);
-
-			switch (rand() % 3 + 1) {
-				case 1:
-					_player->setGun(handGun);
-					break;
-				case 2:
-					_player->setGun(sniperGun);
-					break;
-				case 3:
-					_player->setGun(arGun);
-					break;
+			if (nodeA->getTag() == PLAYER || nodeA->getTag() == ENEMY) 
+			{
+				Actor* actor = dynamic_cast<Actor*>(nodeA);
+				actor->damagedEffect(damage);
 			}
-			return true;
-		}
-		if (nodeB->getTag() == ACTOR && nodeA->getTag() == GUN)
-		{
 
-			switch (rand() % 3 + 1) {
-				case 1:
-					_player->setGun(handGun);
-					break;
-				case 2:
-					_player->setGun(sniperGun);
-					break;
-				case 3:
-					_player->setGun(arGun);
-					break;
-			}
 			return true;
 		}
 
 		//玩家触地
-		if (nodeA->getTag() == ACTOR && nodeB->getTag() == FOOTSTEP) 
+		/*
+		if (nodeA->getTag() == PLAYER && nodeB->getTag() == FOOTSTEP)
 		{
 			log("contactground");
-			Vec2 currentVelovity = _player->getPhysicsBody()->getVelocity();
-			if (currentVelovity.y <= 0)
-				_player->setJumpTime(0);
-			if (_player->getIsJumping()) 
-			{
-				if (currentVelovity.y > 0) 
-				{
-					_player->getPhysicsBody()->setCollisionBitmask(ACTOR_CHANGED_COLLISION_BITMASK);
-					_player->getPhysicsBody()->setCategoryBitmask(ACTOR_CHANGED_CATEGORY_BITMASK);
-				}
-				else 
-				{
-					_player->getPhysicsBody()->setCollisionBitmask(PLAYER_COLLISION_BITMASK);
-					_player->getPhysicsBody()->setCategoryBitmask(PLAYER_CATEGORY_BITMASK);
-					_player->setIsJumping(false);
-				}
-			}
-			if (_player->getIsDowning()) 
-			{
-				log("downing");
-				_player->getPhysicsBody()->setCollisionBitmask(ACTOR_CHANGED_COLLISION_BITMASK);
-				_player->getPhysicsBody()->setCategoryBitmask(ACTOR_CHANGED_CATEGORY_BITMASK);
-			}
-			else 
-			{
-				_player->getPhysicsBody()->setCollisionBitmask(PLAYER_COLLISION_BITMASK);
-				_player->getPhysicsBody()->setCategoryBitmask(PLAYER_CATEGORY_BITMASK);
-
-				_player->setIsDowning(false);
-			}
+			dynamic_cast<Actor*>(nodeA)->contactGround();
 			return true;
 		}
-		if (nodeB->getTag() == ACTOR && nodeA->getTag() == FOOTSTEP) {
+		if (nodeB->getTag() == PLAYER && nodeA->getTag() == FOOTSTEP) {
 			log("contactground");
-			Vec2 currentVelovity = _player->getPhysicsBody()->getVelocity();
-			if (currentVelovity.y <= 0)
-				_player->setJumpTime(0);
-			if (_player->getIsJumping()) 
-			{
-				if (currentVelovity.y > 0) 
-				{
-					_player->getPhysicsBody()->setCollisionBitmask(ACTOR_CHANGED_COLLISION_BITMASK);
-					_player->getPhysicsBody()->setCategoryBitmask(ACTOR_CHANGED_CATEGORY_BITMASK);
-
-				}
-				else 
-				{
-					_player->getPhysicsBody()->setCollisionBitmask(PLAYER_COLLISION_BITMASK);
-					_player->getPhysicsBody()->setCategoryBitmask(PLAYER_CATEGORY_BITMASK);
-
-					_player->setIsJumping(false);
-				}
-			}
-			if (_player->getIsDowning()) 
-			{
-				log("downing");
-				_player->getPhysicsBody()->setCollisionBitmask(ACTOR_CHANGED_COLLISION_BITMASK);
-				_player->getPhysicsBody()->setCategoryBitmask(ACTOR_CHANGED_CATEGORY_BITMASK);
-
-			}
-			else 
-			{
-				_player->getPhysicsBody()->setCollisionBitmask(PLAYER_COLLISION_BITMASK);
-				_player->getPhysicsBody()->setCategoryBitmask(PLAYER_CATEGORY_BITMASK);
-
-				_player->setIsDowning(false);
-			}
+			dynamic_cast<Actor*>(nodeB)->contactGround();
 			return true;
+		}*/
+
+		//AI触地
+		if (nodeA->getTag() == ENEMY && nodeB->getTag() == FOOTSTEP)
+		{
+			log("contactground");
+			dynamic_cast<Actor*>(nodeA)->contactGround();
+			return true;
+		}
+		if (nodeB->getTag() == ENEMY && nodeA->getTag() == FOOTSTEP) {
+			log("contactground");
+			dynamic_cast<Actor*>(nodeB)->contactGround();
+			return true;
+		}
+
+
+		if (nodeA->getTag() == BOX && (nodeB->getTag() == PLAYER || nodeB->getTag() == ENEMY))
+		{
+			Gun* gun=gunOfBox.front();
+			if (nodeB->getTag() == PLAYER)
+			{
+				_player->setGun(gun);
+				canPlayerSet = true;
+			}
+			else
+			{
+				_enemy->setGun(gun);
+				canEnemySet = true;
+			}
+
+			gunOfBox.pop();
+			_box->setVisible(false);
+			_box->getPhysicsBody()->setCategoryBitmask(BOX_CHANGED_CATEGORY_BITMASK);
+			_box->getPhysicsBody()->setCollisionBitmask(BOX_CHANGED_COLLISION_BITMASK);
+			_box->getPhysicsBody()->setContactTestBitmask(0);
+
+		}
+		if (nodeB->getTag() == BOX && (nodeA->getTag() == PLAYER || nodeA->getTag() == ENEMY))
+		{
+			Gun* gun = gunOfBox.front();
+			if (nodeA->getTag() == PLAYER)
+			{
+				_player->setGun(gun);
+				canPlayerSet = true;
+			}
+			else
+			{
+				_enemy->setGun(gun);
+				canEnemySet = true;
+			}
+
+			gunOfBox.pop();
+			_box->setVisible(false);
+			_box->getPhysicsBody()->setCategoryBitmask(BOX_CHANGED_CATEGORY_BITMASK);
+			_box->getPhysicsBody()->setCollisionBitmask(BOX_CHANGED_COLLISION_BITMASK);
+			_box->getPhysicsBody()->setContactTestBitmask(0);
 		}
 	}
 	return true;
 }
-
 
 bool GameScene::responseSeparate(PhysicsContact& contact)
 {
-	//已跳过上一层地面，人物掩码恢复
-	if (_keyMap[W_KEY] == false) 
-	{
-		log("separate uperground");
-		_player->getPhysicsBody()->setCollisionBitmask(PLAYER_COLLISION_BITMASK);
-		_player->getPhysicsBody()->setCategoryBitmask(PLAYER_CATEGORY_BITMASK);
+	auto nodeA = contact.getShapeA()->getBody()->getNode();
+	auto nodeB = contact.getShapeB()->getBody()->getNode();
 
-		_player->setIsJumping(false);
-	}
-	//下落
-	if (_player->getIsDowning()) 
+	if (nodeA && nodeB)
 	{
-		if (_player->getPhysicsBody()->getVelocity().y < 0) 
+		if (nodeA->getTag() == SPAY && nodeB->getTag() == ACTOR ||
+			(nodeB->getTag() == SPAY && nodeA->getTag() == ACTOR))
 		{
-			log("separate current ground");
-			_player->setIsDowning(false);
 			_player->getPhysicsBody()->setCollisionBitmask(PLAYER_COLLISION_BITMASK);
 			_player->getPhysicsBody()->setCategoryBitmask(PLAYER_CATEGORY_BITMASK);
-
+			log("spay works");
+			return true;
 		}
+		/*
+		if (nodeA->getTag() == ACTOR && nodeB->getTag() == FOOTSTEP)
+		{
+			log("renew");
+			dynamic_cast<Actor*>(nodeA)->renewBitMask();
+			if (!dynamic_cast<Actor*>(nodeA)->getIsDowning())
+				dynamic_cast<Actor*>(nodeA)->setIsIntheAir(true);
+			return true;
+		}
+		if (nodeB->getTag() == ACTOR && nodeA->getTag() == FOOTSTEP) {
+			log("renew");
+			dynamic_cast<Actor*>(nodeB)->renewBitMask();
+			if (!dynamic_cast<Actor*>(nodeB)->getIsDowning())
+				dynamic_cast<Actor*>(nodeB)->setIsIntheAir(true);
+			return true;
+		}*/
 
+		//AI触地
+		if (nodeA->getTag() == ENEMY && nodeB->getTag() == FOOTSTEP)
+		{
+			log("renew");
+			dynamic_cast<Actor*>(nodeA)->renewBitMask();
+			if (!dynamic_cast<Actor*>(nodeA)->getIsDowning())
+				dynamic_cast<Actor*>(nodeA)->setIsIntheAir(true);
+			return true;
+		}
+		if (nodeB->getTag() == ENEMY && nodeA->getTag() == FOOTSTEP) {
+			log("renew");
+			dynamic_cast<Actor*>(nodeB)->renewBitMask();
+			if (!dynamic_cast<Actor*>(nodeB)->getIsDowning())
+				dynamic_cast<Actor*>(nodeB)->setIsIntheAir(true);
+			return true;
+		}
 	}
-
 	return true;
 }
-
 //随机掉落箱子
-void GameScene::randomFallGun(const std::string& filename, Vec2 v)
+void GameScene::randomFallGun( Vec2 v)
 {
-	auto visibleSize = Director::getInstance()->getVisibleSize();
-	auto gun = Gun::createGunWithPhysicsBody(filename);
-	gun->setPosition(v);
-	gun->setTag(GUN);
-	addChild(gun);
-	gun->addBulletWithPhysicsBody("bullet.png");
+	while (gunOfBox.size() < 3)
+	{
+		std::string gunType[3] = { HANDGUN_FILENAME,SNIPERGUN_FILENAME ,ARGUN_FILENAME };
+		int choose = rand() % 3;
+		auto gun = Gun::createGunWithPhysicsBody(gunType[choose]);
+		gun->setVisible(true);
+		gun->setTag(GUN);
+		addChild(gun);
+		gun->addBulletWithPhysicsBody("bullet.png");
+		gun->setAttribute(gunAttribute[choose]);
+		gun->setBullets(gun->getAttribute().maxCapacity);
+		gunOfBox.push(gun);
+	}
+	_box->getPhysicsBody()->setCategoryBitmask(BOX_CATEGORY_BITMASK);
+	_box->getPhysicsBody()->setCollisionBitmask(BOX_COLLISION_BITMASK);
+	_box->getPhysicsBody()->setContactTestBitmask(0xFFFFFFFF);
+	_box->setPosition(v);
+	_box->setVisible(true);
+	return;
 
-	this->handGun = gun;
-	this->arGun = gun;
-	this->sniperGun = gun;
-	
 }
 void GameScene::bulletsReloading(float dt)
 {
 	log("enter the schedule function ");
-	handGun->setBullets(handGun->getAttribute().maxCapacity);
+	this->_player->getGun()->setBullets(this->_player->getGun()->getAttribute().maxCapacity);
 
-	if (handGun->getIsReloading())
+	if (this->_player->getGun()->getIsReloading())
 	{
-		handGun->setIsReloading(false);
+		this->_player->getGun()->setIsReloading(false);
 	}
-	if (!handGun->getFirable())
+	if (!this->_player->getGun()->getFirable())
 	{
-		handGun->_firable = true;//记得修改
+		this->_player->getGun()->_firable = true;//记得修改
 	}
+
+	return;
 }
