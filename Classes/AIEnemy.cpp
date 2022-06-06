@@ -3,10 +3,14 @@
 #include "Gun.h"
 #include"Actor.h"
 #include "AIEnemy.h"
+#include "CreateRoomScene.h"
 #include "GameScene.h"
 #include "SystemHeader.h"
+#include"Client.h"
+#include<vector>
 USING_NS_CC;
 
+int  AIEnemy::leftOrRight = 0;
 AIEnemy* AIEnemy::createWithActor(Actor* actor)
 {
 	//Player 类指针创建与错误处理
@@ -34,9 +38,12 @@ AIEnemy* AIEnemy::createWithActor(Actor* actor)
 
 void AIEnemy::fire()
 {
-	if (gun->fire())
-		this->_physicsBody->setVelocity({ (this->_flippedX ? 1 : -1) * 400.0f,_physicsBody->getVelocity().y });
-	return;
+	if (gun->fire()) {
+		this->_physicsBody->setVelocity({ (this->_flippedX ? 1 : -1) * gun->getAttribute().recoilValue,
+		_physicsBody->getVelocity().y });
+		/*王诗腾添加*/
+		this->actorInformation.changeIsFire(true);
+	}
 }
 
 void AIEnemy::stopFire()
@@ -46,7 +53,12 @@ void AIEnemy::stopFire()
 
 void AIEnemy::getPlayerInformation(Player* player)
 {
-	informationOfPlayer = player->sendPlayerInformation();
+	if (CreateRoomScene::AIorPerson == 1) {
+		informationOfPlayer = player->sendPlayerInformation();
+	}
+	else {
+		Client::getInstance()->sendInfo(player->sendPlayerInformation().toString());
+	}
 	return;
 }
 
@@ -107,3 +119,46 @@ void AIEnemy::actByAI()
 	return;
 }
 
+
+
+void AIEnemy::actByFriend(std::string infom)
+{
+	auto info = infom;
+	info.erase(info.begin());
+	info.erase(info.end() - 1);
+	if (info.length() < 5) {
+		return;
+	}
+	log(info.c_str());
+	
+	auto x = Value(info.substr(0, 12)).asFloat();
+	auto y = Value(info.substr(13, 12)).asFloat();
+	bool isFire;
+	if (info.substr(26,5).compare("false") == 0) {
+		isFire = false;
+	}
+	else {
+		isFire = true;
+	}
+	int leftOrRight;
+	if (isFire) {
+		leftOrRight = Value(info.substr(31, 1)).asInt();
+	}
+	else {
+		leftOrRight = Value(info.substr(32, 1)).asInt();
+	}
+	log(Value(leftOrRight).asString().c_str());
+	AIEnemy::leftOrRight = leftOrRight;
+	//cocos2d::log((Value(x).asString() + Value(y).asString()).c_str());
+	this->setPosition(Vec2(x, y));
+	if (leftOrRight == 1) {
+		this->moveOnGround(Vec2(-1e-5, 0));
+	}
+	else {
+		this->moveOnGround(Vec2(1e-5, 0));
+	}
+	if (isFire) {
+		this->fire();
+	}
+	
+}

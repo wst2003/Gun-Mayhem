@@ -2,7 +2,7 @@
 #include "Client.h"
 #include "cocos2d.h"
 #include "network/SocketIO.h"
-
+#include "GameScene.h"
 #include"RankingScene.h"
 #include "CreateRoomScene.h"
 
@@ -24,6 +24,8 @@ Client::Client()
 	_sioClient->on("getTextFromFriend", CC_CALLBACK_2(Client::getTextFromFriend, this));
 	_sioClient->on("getRankingData", CC_CALLBACK_2(Client::getRankingData, this));
 	_sioClient->on("getInviteFriend", CC_CALLBACK_2(Client::getInviteFriend, this));
+	_sioClient->on("getStartGame", CC_CALLBACK_2(Client::getStartGame, this));
+	_sioClient->on("getInfo", CC_CALLBACK_2(Client::getInfo, this));
 }
 
 Client* Client::getInstance()
@@ -51,7 +53,7 @@ void Client::onConnect(cocos2d::network::SIOClient* client)
 }
 void Client::onMessage(cocos2d::network::SIOClient* client, const std::string& data)
 {
-	log("HelloWorld::onMessage received: %s", data.c_str());
+	//log("HelloWorld::onMessage received: %s", data.c_str());
 };
 
 void Client::onClose(cocos2d::network::SIOClient* client)
@@ -186,5 +188,28 @@ void Client::getInviteFriend(cocos2d::network::SIOClient* client, const std::str
 	log((fID + data.substr(data.length(), 1)).c_str());
 	CreateRoomScene::isInvited = true;
 	CreateRoomScene::myNum = myNum;
+	CreateRoomScene::AIorPerson = 2;
 	Client::friendID = fID;
+}
+
+void Client::startGame(const std::string& ID)
+{
+	_sioClient->emit("startGame", this->friendID);
+}
+
+void  Client::getStartGame(cocos2d::network::SIOClient* client, const std::string& ID)
+{
+	log("start");
+	auto scene = GameScene::createScene();
+	Director::getInstance()->pushScene(scene);
+}
+
+void Client::sendInfo(const std::string& info)
+{
+	_sioClient->emit("sendInfo", { friendID,info });
+}
+
+void  Client::getInfo(cocos2d::network::SIOClient* client, const std::string& info)
+{
+	GameScene::info = info;
 }

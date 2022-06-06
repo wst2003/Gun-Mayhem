@@ -31,6 +31,12 @@ public:
 	void inviteFriend(const std::string& ID);
 	void getInviteFriend(cocos2d::network::SIOClient* client, const std::string& ID);
 
+	void startGame(const std::string& ID);
+	void getStartGame(cocos2d::network::SIOClient* client, const std::string& ID);
+
+	void sendInfo(const std::string& info);
+	void getInfo(cocos2d::network::SIOClient* client, const std::string& info);
+
 	static bool getIsRegister();
 	static bool getIsLogin();
 	std::string myID;

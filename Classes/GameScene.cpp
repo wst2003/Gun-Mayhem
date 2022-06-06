@@ -8,6 +8,7 @@
 #include"winScene.h"
 #include"loseScene.h"
 #include "SystemHeader.h"
+#include"CreateRoomScene.h"
 #include "ui/UIScrollView.h"
 
 #include <fstream>
@@ -17,7 +18,7 @@ USING_NS_CC;
 
 PhysicsWorld* GameScene::physicsWorld = nullptr;
 Sprite* GameScene::_box = nullptr;
-
+std::string GameScene::info= "";
 //创建场景
 Scene* GameScene::createScene()
 {
@@ -41,8 +42,8 @@ bool GameScene::init()
 		return false;
 	}
 
-	
-
+	//ifs.open("info.txt");
+	log("game");
 	//添加调度器
 	this->scheduleUpdate();
 
@@ -82,20 +83,40 @@ bool GameScene::init()
 	playerGun->setBullets(playerGun->getAttribute().maxCapacity);
 	
 	randomFallGun({ visibleSize.width * 4 / 5, 290 });
-
+	
 	//人物
 	auto player = Player::createWithActor(Actor::createActorWithPhysicsBody("playerA.png"));
-	player->setPosition(visibleSize.width / 4, visibleSize.height + player->getContentSize().height);
-	player->setRemainingLive(3);
+	if (CreateRoomScene::AIorPerson == 1) {
+		player->setPosition(visibleSize.width / 4, visibleSize.height + player->getContentSize().height);
+	}
+	else {
+		if (CreateRoomScene::myNum == 1) {
+			player->setPosition(visibleSize.width / 4, visibleSize.height + player->getContentSize().height);
+		}
+		else {
+			player->setPosition(visibleSize.width * 3 / 4, visibleSize.height + player->getContentSize().height);
+		}
+	}
+	player->setRemainingLive(5);
 	addChild(player);
 	player->setGun(playerGun);
 	player->setID(0);
 	player->initActor();
 	this->_player = player;
-
+	
 	//敌人
 	auto enemy = AIEnemy::createWithActor(Actor::createActorWithPhysicsBody("playerB.png"));
-	enemy->setPosition(visibleSize.width * 3 / 4, visibleSize.height + enemy->getContentSize().height);
+	if (CreateRoomScene::AIorPerson == 1) {
+		enemy->setPosition(visibleSize.width * 3 / 4, visibleSize.height + enemy->getContentSize().height);
+	}
+	else {
+		if (CreateRoomScene::myNum == 1) {
+			enemy->setPosition(visibleSize.width * 3 / 4, visibleSize.height + enemy->getContentSize().height);
+		}
+		else {
+			enemy->setPosition(visibleSize.width / 4, visibleSize.height + enemy->getContentSize().height);
+		}
+	}
 	enemy->setRemainingLive(5);
 	addChild(enemy);
 	this->_enemy = enemy;
@@ -301,11 +322,22 @@ void GameScene::update(float dt)
 	_enemy->changeBitMask();
 	_player->setActorInformation();
 	_enemy->getPlayerInformation(_player);
-	_enemy->actByAI();
-
 	
-	
-	
+	if (CreateRoomScene::AIorPerson == 1) {
+		_enemy->actByAI();
+	}
+	else {
+		_enemy->actByFriend(info);
+	}
+	/*
+	auto info = _player->sendPlayerInformation().toString();
+	ofs << info << "\n";
+	if (kk == 500) {
+		ofs.close();
+	}
+	else {
+		kk++;
+	}*/
 	
 	return;
 }
@@ -354,20 +386,7 @@ bool GameScene::responseContact(PhysicsContact& contact)
 			return true;
 		}
 
-		//玩家触地
-		/*
-		if (nodeA->getTag() == PLAYER && nodeB->getTag() == FOOTSTEP)
-		{
-			log("contactground");
-			dynamic_cast<Actor*>(nodeA)->contactGround();
-			return true;
-		}
-		if (nodeB->getTag() == PLAYER && nodeA->getTag() == FOOTSTEP) {
-			log("contactground");
-			dynamic_cast<Actor*>(nodeB)->contactGround();
-			return true;
-		}*/
-
+		
 		//AI触地
 		if (nodeA->getTag() == ENEMY && nodeB->getTag() == FOOTSTEP)
 		{

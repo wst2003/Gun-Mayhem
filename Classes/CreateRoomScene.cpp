@@ -3,8 +3,6 @@
 #include "network/SocketIO.h"
 #include "CreateRoomScene.h"
 #include "GameScene.h"
-#include "GameNetScene.h"
-
 USING_NS_CC;
 using namespace  cocos2d::network;
 
@@ -146,7 +144,7 @@ void CreateRoomScene::updateFindFriendStatus(float dt)
 		auto friendMenuItem = MenuItemFont::create(Client::getInstance()->friendID,
 			[this](Ref* r) {this->friendPlayerLabel->setVisible(true),
 			this->friendPlayerLabel->setString(Value(this->friendNum).asString() + "P:"+ Client::getInstance()->friendID)
-			, AIorPerson=2/*,Client::getInstance()->inviteFriend(Client::getInstance()->friendID)*/; });
+			, AIorPerson=2,Client::getInstance()->inviteFriend(Client::getInstance()->friendID); });
 
 		friendMenuItem->setPosition(Vec2(visibleSize.width / 2 - 100, visibleSize.height / 2 - 150));
 		auto friendMenu = Menu::create(friendMenuItem, NULL);
@@ -190,13 +188,9 @@ void CreateRoomScene::backCallBack(Ref* r)
 
 void CreateRoomScene::startGameCallBack(Ref* r)
 {
-	if (AIorPerson == 1) {
-		auto scene = GameScene::createScene();
-		Director::getInstance()->pushScene(scene);
-	}
 	if (AIorPerson == 2) {
-		auto scene = GameNetScene::createScene();
-		Director::getInstance()->pushScene(scene);
+		Client::getInstance()->startGame("");
 	}
-	
+	auto scene = GameScene::createScene();
+	Director::getInstance()->pushScene(scene);
 }

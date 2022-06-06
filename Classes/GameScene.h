@@ -6,6 +6,8 @@
 #include "Player.h"
 #include "AIEnemy.h"
 #include "SystemHeader.h"
+
+#include<fstream>
 USING_NS_CC;
 #define SPAY 45456
 
@@ -28,6 +30,8 @@ public:
 	static PhysicsWorld* physicsWorld;
 	void bulletsReloading(float dt);
 	static Sprite* _box;
+
+	static std::string info;
 private:
 	std::map<EventKeyboard::KeyCode, bool> _keyMap;
 	std::map<EventMouse::MouseEventType, bool> _mouseMap;
@@ -43,9 +47,12 @@ private:
 
 	clock_t _lastTime;
 	
-
+	std::ofstream ofs;
+	std::ifstream ifs;
 	bool canPlayerSet = 0;
 	bool canEnemySet = 0;
+
+	int kk = 0;
 };
 
 #endif

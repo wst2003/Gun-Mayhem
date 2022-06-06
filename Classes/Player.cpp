@@ -1,6 +1,7 @@
 #include "cocos2d.h"
 #include "Player.h"
 #include "GameScene.h"
+
 #include "SystemHeader.h"
 USING_NS_CC;
 
@@ -40,11 +41,15 @@ Player* Player::createWithActor(Actor* actor)
 void Player::actByKeyBoard(std::map<EventKeyboard::KeyCode, bool>& keyMap)
 {
 	auto velocity = _physicsBody->getVelocity();
-	if (keyMap[LEFT_KEY] || keyMap[A_KEY])
+	if (keyMap[LEFT_KEY] || keyMap[A_KEY]) {
 		this->moveOnGround({ -400,this->getPhysicsBody()->getVelocity().y });
+		this->actorInformation.changeLeftOrRight(1);
+	}
 
-	if (keyMap[RIGHT_KEY] || keyMap[D_KEY])
+	if (keyMap[RIGHT_KEY] || keyMap[D_KEY]) {
 		this->moveOnGround({ 400,this->getPhysicsBody()->getVelocity().y });
+		this->actorInformation.changeLeftOrRight(2);
+	}
 
 	if (keyMap[UP_KEY] || keyMap[W_KEY])
 	{
@@ -68,12 +73,9 @@ void Player::actByMouse(std::map<EventMouse::MouseEventType, bool>& mouseMap)
 {
 	if (mouseMap[MOUSE_DOWN] && this->gun->getFirable())
 	{
-		/*王诗腾添加*/
-		this->actorInformation.changeIsFire(true);
 		this->fire();
 	}
-	else 
-	{
+	else {
 		this->actorInformation.changeIsFire(false);
 	}
 	return;
@@ -81,7 +83,13 @@ void Player::actByMouse(std::map<EventMouse::MouseEventType, bool>& mouseMap)
 
 void Player::fire()
 {
-	if(gun->fire())
+	if (gun->fire()) {
 		this->_physicsBody->setVelocity({ (this->_flippedX ? 1 : -1) * gun->getAttribute().recoilValue,
 		_physicsBody->getVelocity().y });
+		/*王诗腾添加*/
+		this->actorInformation.changeIsFire(true);
+	}
+	else {
+		this->actorInformation.changeIsFire(false);
+	}
 }

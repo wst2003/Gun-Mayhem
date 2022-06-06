@@ -70,9 +70,9 @@
 #define MOUSE_MOVE EventMouse::MouseEventType::MOUSE_MOVE
 
 //must be edited
-#define HANDGUN_ARR {20,0.5,10,8,2000}
-#define SNIPERGUN_ARR {7,1,30,20,2800}
-#define ARGUN_ARR {50,0.1,4,6,2800}
+#define HANDGUN_ARR {20,0.5,10,8*50,2000}
+#define SNIPERGUN_ARR {7,1,30,20*50,2800}
+#define ARGUN_ARR {50,0.1,4,6*50,2800}
 
 #define HANDGUN_TYPE 1;
 #define SNIPERGUN_TYPE 2;

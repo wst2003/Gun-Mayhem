@@ -60,7 +60,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
 
     // create a scene. it's an autorelease object
     auto scene = StartGameScene::createScene();
-    srand((unsigned int)time(NULL));
+    //srand((unsigned int)time(NULL));
     AudioEngine::preload(BACKGROUNDA);
     // run
     director->runWithScene(scene);

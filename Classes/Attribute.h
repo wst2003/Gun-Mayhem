@@ -20,6 +20,7 @@ public:
 	void changePosition(Vec2 newVec2);
 	void changeIsFire(bool isFire);
 	void changeGunType(int gunType);
+	void changeLeftOrRight(int leftOrRight);
 	std::string toString();		//转换成字符串(for net)
 	static ActorInformation toActorInformation(const std::string& s);	//从字符串转回(for net)
 	Vec2 getPosition();
@@ -28,5 +29,6 @@ private:
 	bool _isFire;
 	int _gunType;
 	int remainLive;
+	int leftOrRight=2;
 };
 

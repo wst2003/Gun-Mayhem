@@ -26,12 +26,32 @@ void ActorInformation::changeGunType(int gunType)
 
 	return;
 }
+void ActorInformation::changeLeftOrRight(int leftOrRight)
+{
+	this->leftOrRight = leftOrRight;
+}
 
 //将人物信息转换为string
 std::string ActorInformation::toString()
 {
-	return Value(_position.x).asString()+"|"+ Value(_position.y).asString() + "|"+Value(_isFire).asString()+"|"
-		+Value(_gunType).asString();
+	auto xstr = Value(_position.x).asString();
+	if (xstr.length() < 12) {
+		auto del = 12 - xstr.length();
+		std::string  tmp= "0";
+		for (int i = 0; i < del; i++) {
+			xstr += tmp;
+		}
+	}
+	auto ystr = Value(_position.y).asString();
+	if (ystr.length() < 12) {
+		auto del = 12 - ystr.length();
+		std::string  tmp = "0";
+		for (int i = 0; i <del; i++) {
+			ystr += tmp;
+		}
+	}
+	return xstr+"|"+ ystr + "|"+Value(_isFire).asString()+"|"
+		+Value(leftOrRight).asString();
 }
 
 //将字符串转换为人物信息
