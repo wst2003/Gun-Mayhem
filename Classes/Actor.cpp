@@ -7,9 +7,6 @@
 #include "loseScene.h"
 #include "winScene.h"
 USING_NS_CC;
-#define SPEED_LEFT -400
-#define SPEED_RIGHT 400
-#define SPEED_UP 950
 
 
 //创建人物
@@ -152,6 +149,7 @@ void Actor::fallOnGroundEffect()
 //受伤的效果
 void Actor::damagedEffect(int damage)
 {
+	damageTime = clock();
 	auto emitter = ParticleExplosion::create();
 	emitter->setLife(0.1f);
 	emitter->setLifeVar(0.5f);
@@ -252,6 +250,8 @@ void Actor::setActorInformation()
 {
 	actorInformation.changePosition(this->getPosition());
 }
+
+
 
 void Actor::changeBitMask()
 {
@@ -372,8 +372,8 @@ void Actor::reLive(bool flag)
 		this->setBloodLeft(100);
 		log("%d", currentLive);
 		this->setPosition(visibleSize.width / 4, visibleSize.height + this->getContentSize().height);
-
 		this->getPhysicsBody()->setVelocity({ 0,0 });
+		this->setGun(gun);
 	}
 	return;
 }
@@ -404,3 +404,4 @@ void Actor::renewBrand()
 	bloodBar->setPercent(_bloodLeft);
 	return;
 }
+

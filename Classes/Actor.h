@@ -77,5 +77,7 @@ protected:
 	int _bloodLeft = 100;
 
 	ui::LoadingBar* bloodBar;
-	
+
+	clock_t damageTime;
+	clock_t fireTime;
 };

@@ -4,7 +4,7 @@
 #define MUSIC_KEY "music_key"
 #define SOUND_KEY "sound_key"
 #define BACKGROUNDA "1.mp3"
-#define CLICKSOUND "sound/click.m4a"
+#define CLICKSOUND "2.mp3"
 
 #define NUM_MAP 5
 #define MAPID "mapid"
@@ -15,6 +15,12 @@
 
 #define GROUND 400
 #define MAP 140
+
+#define MAP1 111
+#define MAP2 112
+#define MAP3 113
+#define MAP4 114
+
 #define FOOTSTEP 200
 #define PLAYER 101
 #define ACTOR 101
@@ -70,9 +76,9 @@
 #define MOUSE_MOVE EventMouse::MouseEventType::MOUSE_MOVE
 
 //must be edited
-#define HANDGUN_ARR {20,0.5,10,8,2000}
-#define SNIPERGUN_ARR {7,1,30,20,2800}
-#define ARGUN_ARR {50,0.1,4,6,2800}
+#define HANDGUN_ARR {20,0.5,10,400,2000}
+#define SNIPERGUN_ARR {7,1,30,600,2800}
+#define ARGUN_ARR {50,0.2,4,300,2800}
 
 #define HANDGUN_TYPE 1;
 #define SNIPERGUN_TYPE 2;
@@ -86,3 +92,7 @@
 #define BRAND_BULLETLEFT 456
 #define BRAND_LIFELEFT 457
 #define BRAND_BLOODPERCENT 458
+
+#define SPEED_LEFT -400
+#define SPEED_RIGHT 400
+#define SPEED_UP 780

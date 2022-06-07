@@ -100,7 +100,7 @@ bool Gun::fire()
 		bulletSprite->setTag(attr.damageValue);
 		this->getScene()->addChild(bulletSprite);
 
-		auto bulletBody = PhysicsBody::createBox(bulletSprite->getContentSize(), PhysicsMaterial(20.0f, 1.0f, 1.0f));
+		auto bulletBody = PhysicsBody::createBox(bulletSprite->getContentSize(), PhysicsMaterial(100.0f, 1.0f, 1.0f));
 		bulletBody->setGravityEnable(false);
 		bulletSprite->addComponent(bulletBody);
 
@@ -116,6 +116,9 @@ bool Gun::fire()
 		emitter->setColor(Color3B::YELLOW);
 		emitter->setPosition(bulletBody->getPosition() + this->getContentSize());
 		addChild(emitter);
+
+		if (UserDefault::getInstance()->getBoolForKey(SOUND_KEY))
+			AudioEngine::play2d(CLICKSOUND);
 		return true;
 	}
 	else

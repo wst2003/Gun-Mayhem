@@ -2,7 +2,7 @@
 #include "StartGameScene.h"
 #include "Player.h"
 #include "Actor.h"
-#include "GameScene.h"
+#include "GameNetScene.h"
 #include "AIEnemy.h"
 #include "Gun.h"
 #include"winScene.h"
@@ -15,55 +15,11 @@
 
 USING_NS_CC;
 
-PhysicsWorld* GameScene::physicsWorld = nullptr;
-Sprite* GameScene::_box = nullptr;
-
-std::vector <std::vector< EdgePosition >> GameScene::mapEdge = {
-	{
-		{Vec2(660, 290),1332 },
-		{Vec2(900, 438), 426},
-		{Vec2(400, 510), 413},
-		{Vec2(900, 575), 426},
-		{Vec2(400, 647), 413}
-
-	},
-	{
-		{Vec2(675, 140), 1045},
-		{Vec2(297, 286), 420},
-		{Vec2(1076, 286), 420},
-		{Vec2(675, 438), 515},
-		{Vec2(297, 577), 420},
-		{Vec2(1076, 577), 420},
-		{Vec2(675, 720), 1045}
-	},
-	{
-		{Vec2(675, 237), 1350},
-		{Vec2(190, 350), 225},
-		{Vec2(1150, 350), 225},
-		{Vec2(190, 490), 225},
-		{Vec2(1150, 490), 225}
-	},
-	{
-		
-		{Vec2(188, 140), 320},
-		{Vec2(540, 140), 260},
-		{Vec2(880, 140), 260},
-		{Vec2(1215, 140), 245},
-		{Vec2(865, 280), 178},
-		{Vec2(520, 290), 178},
-		{Vec2(163, 395), 262},
-		{Vec2(687, 400), 180},
-		{Vec2(1180, 410), 245},
-		{Vec2(400, 510), 182},
-		{Vec2(890, 540), 176},
-		{Vec2(175, 647), 255},
-		{Vec2(610, 647), 272},
-		{Vec2(1082, 650), 260}
-	}
-};
+PhysicsWorld* GameNetScene::physicsWorld = nullptr;
+Sprite* GameNetScene::_box = nullptr;
 
 //创建场景
-Scene* GameScene::createScene()
+Scene* GameNetScene::createScene()
 {
 
 	auto scene = Scene::createWithPhysics();	//物理引擎
@@ -71,13 +27,13 @@ Scene* GameScene::createScene()
 	scene->getPhysicsWorld()->setSubsteps(10.0f);
 	scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
 	physicsWorld = scene->getPhysicsWorld();
-	auto gameLayer = GameScene::create();
+	auto gameLayer = GameNetScene::create();
 	scene->addChild(gameLayer);
 
 	return scene;
 }
 
-bool GameScene::init()
+bool GameNetScene::init()
 {
 	//物理世界
 	if (!Scene::init())
@@ -85,7 +41,7 @@ bool GameScene::init()
 		return false;
 	}
 
-	
+	ofs.open("info.txt");
 
 	//添加调度器
 	this->scheduleUpdate();
@@ -124,13 +80,13 @@ bool GameScene::init()
 	playerGun->addBulletWithPhysicsBody("dbullet.png");
 	playerGun->setAttribute(HANDGUN_ARR);
 	playerGun->setBullets(playerGun->getAttribute().maxCapacity);
-
-	randomFallGun();
+	
+	randomFallGun({ visibleSize.width * 4 / 5, 290 });
 
 	//人物
 	auto player = Player::createWithActor(Actor::createActorWithPhysicsBody("playerA.png"));
 	player->setPosition(visibleSize.width / 4, visibleSize.height + player->getContentSize().height);
-	player->setRemainingLive(10);
+	player->setRemainingLive(3);
 	addChild(player);
 	player->setGun(playerGun);
 	player->setID(0);
@@ -140,7 +96,7 @@ bool GameScene::init()
 	//敌人
 	auto enemy = AIEnemy::createWithActor(Actor::createActorWithPhysicsBody("playerB.png"));
 	enemy->setPosition(visibleSize.width * 3 / 4, visibleSize.height + enemy->getContentSize().height);
-	enemy->setRemainingLive(3);
+	enemy->setRemainingLive(5);
 	addChild(enemy);
 	this->_enemy = enemy;
 	enemy->setGun(enemyGun);
@@ -180,8 +136,8 @@ bool GameScene::init()
 
 	//碰撞监听器
 	auto contactListener = EventListenerPhysicsContact::create();
-	contactListener->onContactBegin = CC_CALLBACK_1(GameScene::responseContact, this);
-	contactListener->onContactSeparate=CC_CALLBACK_1(GameScene::responseSeparate, this);
+	contactListener->onContactBegin = CC_CALLBACK_1(GameNetScene::responseContact, this);
+	contactListener->onContactSeparate=CC_CALLBACK_1(GameNetScene::responseSeparate, this);
 
 	//添加监听器
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(contactListener, this);
@@ -191,35 +147,66 @@ bool GameScene::init()
 	return true;
 }
 
-void GameScene::initMap()
+void GameNetScene::initMap()
 {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	auto origin = Director::getInstance()->getVisibleOrigin();
 
 	//创建平台
 	switch (UserDefault::getInstance()->getIntegerForKey(MAPID)) {
-		case MAP1:
+		case 111:
 			map = Sprite::create("map1.png");
+			createGround(Vec2(660, 290), 1332);
+			createGround(Vec2(400, 510), 413);
+			createGround(Vec2(400, 647), 413);
+			createGround(Vec2(900, 438), 426);
+			createGround(Vec2(900, 575), 426);
 			break;
-		case MAP2:
+		case 112:
 			map = Sprite::create("map2.png");
+			createGround(Vec2(675, 720), 1045);
+			createGround(Vec2(675, 140), 1045);
+			createGround(Vec2(675, 438), 515);
+			createGround(Vec2(297, 577), 420);
+			createGround(Vec2(297, 286), 420);
+			createGround(Vec2(1076, 577), 420);
+			createGround(Vec2(1076, 286), 420);
 			break;
-		case MAP3:
+		case 113:
 			map = Sprite::create("map3.png");
+			createGround(Vec2(675, 237), 1350);
+			createGround(Vec2(190, 350), 225);
+			createGround(Vec2(190, 490), 225);
+			createGround(Vec2(1150, 350), 225);
+			createGround(Vec2(1150, 490), 225);
 			break;
-		case MAP4:
+		case 114:
 			map = Sprite::create("map4.png");
+			createGround(Vec2(175, 647), 255);
+			createGround(Vec2(610, 647), 272);
+			createGround(Vec2(1082, 650), 260);
+			createGround(Vec2(400, 510), 182);
+			createGround(Vec2(890, 540), 176);
+			createGround(Vec2(163, 395), 262);
+			createGround(Vec2(687, 400), 180);
+			createGround(Vec2(1180, 410), 245);
+			createGround(Vec2(520, 290), 178);
+			createGround(Vec2(865, 280), 178);
+			createGround(Vec2(188, 140), 320);
+			createGround(Vec2(540, 140), 260);
+			createGround(Vec2(880, 140), 260);
+			createGround(Vec2(1215, 140), 245);
+			break;
+		default:
 			break;
 	}
-	for (EdgePosition const& i : mapEdge[UserDefault::getInstance()->getIntegerForKey(MAPID) - MAP1])
-		createGround(i.edgePos, i.edgeLength);
 	map->setScaleX(visibleSize.width / map->getContentSize().width);
 	map->setScaleY(visibleSize.height / map->getContentSize().height);
 	map->setPosition(visibleSize / 2);
 	this->addChild(map);
 
 	//创建一个物体对象 EdgeBox是一个空心的矩形 相当于边框效果 
-/*	auto node = Node::create();
+	auto node = Node::create();
 	auto bound = PhysicsBody::createEdgeBox(Size(visibleSize.width, visibleSize.height * 3 / 2), PhysicsMaterial(0.1f, 0.0f, 1.0f));
 	bound->setContactTestBitmask(0xFFFFFFFF);
 	bound->setCategoryBitmask(EDGE_CATEGORY_BITMASK);
@@ -227,10 +214,10 @@ void GameScene::initMap()
 	node->setPhysicsBody(bound);
 	node->setTag(EDGE);
 	node->setPosition(Point(visibleSize.width / 2, visibleSize.height / 2));
-	this->addChild(node);*/
+	this->addChild(node);
 	/*--------------------------------------------------*/
 }
-void GameScene::createGround(Vec2 pos, float length)
+void GameNetScene::createGround(Vec2 pos, float length)
 {
 	auto stoneSprite = Sprite::create("ground.jpg");
 	stoneSprite->setScaleX(length / stoneSprite->getContentSize().width);
@@ -252,8 +239,8 @@ void GameScene::createGround(Vec2 pos, float length)
 	auto spayEdge = PhysicsBody::createBox(stoneSprite->getContentSize());
 	spaySprite->setPhysicsBody(spayEdge);
 	spayEdge->setDynamic(false);
-	spaySprite->setPosition(Vec2(pos.x, pos.y - 10.0f));
-	spaySprite->setScaleX(length / stoneSprite->getContentSize().width * 1.2);
+	spaySprite->setPosition(Vec2(pos.x,pos.y-10.0f));
+	spaySprite->setScaleX(length / stoneSprite->getContentSize().width*1.2);
 	spaySprite->setScaleY(0.1f);
 	spayEdge->setCategoryBitmask(0xFFFFFFFF);
 	spayEdge->setCollisionBitmask(0);
@@ -265,7 +252,7 @@ void GameScene::createGround(Vec2 pos, float length)
 	return;
 }
 
-void GameScene::createBrand(Actor* actor)
+void GameNetScene::createBrand(Actor* actor)
 {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	addChild(actor->nameLabel, 2, BRAND_NAME + actor->getID());
@@ -275,7 +262,10 @@ void GameScene::createBrand(Actor* actor)
 	return;
 }
 //
-void GameScene::update(float dt)
+
+
+int lines = 0;
+void GameNetScene::update(float dt)
 {
 	_player->renewBrand();
 	_enemy->renewBrand();
@@ -283,9 +273,9 @@ void GameScene::update(float dt)
 	clock_t now = clock();
 	if (now - _lastTime > 10000.0f)
 	{
-		randomFallGun();
+		randomFallGun({ 1.0f * (rand() % (static_cast<int>(Director::getInstance()->getVisibleSize().width))),
+			1.0f * (std::max(rand() % static_cast<int>(Director::getInstance()->getVisibleSize().height / 2),0) +static_cast<int>(Director::getInstance()->getVisibleSize().height / 2)) });
 		_lastTime = now;
-
 	}
 
 	//刷新枪的状态
@@ -316,15 +306,19 @@ void GameScene::update(float dt)
 	_enemy->getPlayerInformation(_player);
 	_enemy->actByAI();
 
+	auto info = _player->sendPlayerInformation().toString();
 	
 	
-	
-	
+	ofs << info << "\n";
+	if (lines > 1000) {
+		ofs.close();
+	}
+	lines += 1;
 	return;
 }
 
 //
-bool GameScene::responseContact(PhysicsContact& contact)
+bool GameNetScene::responseContact(PhysicsContact& contact)
 {
 	auto nodeA = contact.getShapeA()->getBody()->getNode();
 	auto nodeB = contact.getShapeB()->getBody()->getNode();
@@ -366,6 +360,20 @@ bool GameScene::responseContact(PhysicsContact& contact)
 
 			return true;
 		}
+
+		//玩家触地
+		/*
+		if (nodeA->getTag() == PLAYER && nodeB->getTag() == FOOTSTEP)
+		{
+			log("contactground");
+			dynamic_cast<Actor*>(nodeA)->contactGround();
+			return true;
+		}
+		if (nodeB->getTag() == PLAYER && nodeA->getTag() == FOOTSTEP) {
+			log("contactground");
+			dynamic_cast<Actor*>(nodeB)->contactGround();
+			return true;
+		}*/
 
 		//AI触地
 		if (nodeA->getTag() == ENEMY && nodeB->getTag() == FOOTSTEP)
@@ -426,7 +434,7 @@ bool GameScene::responseContact(PhysicsContact& contact)
 	return true;
 }
 
-bool GameScene::responseSeparate(PhysicsContact& contact)
+bool GameNetScene::responseSeparate(PhysicsContact& contact)
 {
 	auto nodeA = contact.getShapeA()->getBody()->getNode();
 	auto nodeB = contact.getShapeB()->getBody()->getNode();
@@ -478,18 +486,12 @@ bool GameScene::responseSeparate(PhysicsContact& contact)
 	return true;
 }
 //随机掉落箱子
-void GameScene::randomFallGun()
+void GameNetScene::randomFallGun( Vec2 v)
 {
-	int floor = 0;
-	int mapId = UserDefault::getInstance()->getIntegerForKey(MAPID) - MAP1;
-	circleRandom %= 30;
-	floor = randomNum[circleRandom++] % (mapEdge[mapId].size());
-	Vec2 v = { mapEdge[mapId][floor].edgePos.x - mapEdge[mapId][floor].edgeLength / 4, mapEdge[mapId][floor].edgePos.y + _box->getContentSize().height / 2 };
 	while (gunOfBox.size() < 3)
 	{
 		std::string gunType[3] = { HANDGUN_FILENAME,SNIPERGUN_FILENAME ,ARGUN_FILENAME };
-		int choose = gunTypes[gunChoose++];
-		gunChoose %= 10;
+		int choose = rand() % 3;
 		auto gun = Gun::createGunWithPhysicsBody(gunType[choose]);
 		gun->setVisible(true);
 		gun->setTag(GUN);
@@ -507,7 +509,7 @@ void GameScene::randomFallGun()
 	return;
 
 }
-void GameScene::bulletsReloading(float dt)
+void GameNetScene::bulletsReloading(float dt)
 {
 	log("enter the schedule function ");
 	this->_player->getGun()->setBullets(this->_player->getGun()->getAttribute().maxCapacity);

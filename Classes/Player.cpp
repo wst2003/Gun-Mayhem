@@ -39,11 +39,12 @@ Player* Player::createWithActor(Actor* actor)
 //
 void Player::actByKeyBoard(std::map<EventKeyboard::KeyCode, bool>& keyMap)
 {
+	auto now = clock();
 	auto velocity = _physicsBody->getVelocity();
-	if (keyMap[LEFT_KEY] || keyMap[A_KEY])
+	if ((keyMap[LEFT_KEY] || keyMap[A_KEY]) && now - damageTime >= 200 && now - fireTime >= 100)
 		this->moveOnGround({ -400,this->getPhysicsBody()->getVelocity().y });
 
-	if (keyMap[RIGHT_KEY] || keyMap[D_KEY])
+	if ((keyMap[RIGHT_KEY] || keyMap[D_KEY]) && now - damageTime >= 200 && now - fireTime >= 100)
 		this->moveOnGround({ 400,this->getPhysicsBody()->getVelocity().y });
 
 	if (keyMap[UP_KEY] || keyMap[W_KEY])
@@ -68,15 +69,24 @@ void Player::actByMouse(std::map<EventMouse::MouseEventType, bool>& mouseMap)
 {
 	if (mouseMap[MOUSE_DOWN] && this->gun->getFirable())
 	{
+		/*ÍõÊ«ÌÚÌí¼Ó*/
+		this->actorInformation.changeIsFire(true);
 		this->fire();
 	}
-	
+	else 
+	{
+		this->actorInformation.changeIsFire(false);
+	}
 	return;
 }
 
 void Player::fire()
 {
-	if(gun->fire())
+	if (gun->fire())
+	{
 		this->_physicsBody->setVelocity({ (this->_flippedX ? 1 : -1) * gun->getAttribute().recoilValue,
 		_physicsBody->getVelocity().y });
+
+		fireTime = clock();
+	}
 }

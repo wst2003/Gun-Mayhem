@@ -62,6 +62,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
     auto scene = StartGameScene::createScene();
     srand((unsigned int)time(NULL));
     AudioEngine::preload(BACKGROUNDA);
+    AudioEngine::preload(CLICKSOUND);
     // run
     director->runWithScene(scene);
 
