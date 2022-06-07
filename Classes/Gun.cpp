@@ -3,8 +3,6 @@
 #include "Attribute.h"
 #include "SystemHeader.h"
 #include "GameScene.h"
-#include"AIEnemy.h"
-#include"CreateRoomScene.h"
 
 USING_NS_CC;
 
@@ -102,7 +100,7 @@ bool Gun::fire()
 		bulletSprite->setTag(attr.damageValue);
 		this->getScene()->addChild(bulletSprite);
 
-		auto bulletBody = PhysicsBody::createBox(bulletSprite->getContentSize(), PhysicsMaterial(20.0f, 1.0f, 1.0f));
+		auto bulletBody = PhysicsBody::createBox(bulletSprite->getContentSize(), PhysicsMaterial(100.0f, 1.0f, 1.0f));
 		bulletBody->setGravityEnable(false);
 		bulletSprite->addComponent(bulletBody);
 
@@ -110,10 +108,7 @@ bool Gun::fire()
 		bulletSprite->getPhysicsBody()->setCategoryBitmask(BULLET_CATEGORY_BITMASK);
 		bulletSprite->getPhysicsBody()->setContactTestBitmask(0xFFFFFFFF);
 		//float bulletVelocity = 2800;
-		log(Value(this->_flippedX).asString().c_str());
-		
 		bulletBody->setVelocity({ (this->_flippedX ? -1 : 1) * attr.velocity,0 });
-	
 		auto emitter = ParticleFire::create();
 		emitter->setLife(0.1f);
 		emitter->setLifeVar(0.5f);
@@ -121,6 +116,9 @@ bool Gun::fire()
 		emitter->setColor(Color3B::YELLOW);
 		emitter->setPosition(bulletBody->getPosition() + this->getContentSize());
 		addChild(emitter);
+
+		if (UserDefault::getInstance()->getBoolForKey(SOUND_KEY))
+			AudioEngine::play2d(CLICKSOUND);
 		return true;
 	}
 	else

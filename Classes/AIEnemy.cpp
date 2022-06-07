@@ -3,13 +3,12 @@
 #include "Gun.h"
 #include"Actor.h"
 #include "AIEnemy.h"
-#include "CreateRoomScene.h"
 #include "GameScene.h"
 #include "SystemHeader.h"
 #include"Client.h"
-#include<vector>
-USING_NS_CC;
+#include "CreateRoomScene.h"
 
+USING_NS_CC;
 int  AIEnemy::leftOrRight = 0;
 AIEnemy* AIEnemy::createWithActor(Actor* actor)
 {
@@ -38,12 +37,17 @@ AIEnemy* AIEnemy::createWithActor(Actor* actor)
 
 void AIEnemy::fire()
 {
-	if (gun->fire()) {
+	if (gun->fire())
+	{
 		this->_physicsBody->setVelocity({ (this->_flippedX ? 1 : -1) * gun->getAttribute().recoilValue,
 		_physicsBody->getVelocity().y });
-		/*ÍõÊ«ÌÚÌí¼Ó*/
+
+		fireTime = clock();
 		this->actorInformation.changeIsFire(true);
 	}
+	else
+		this->actorInformation.changeIsFire(false);
+	return;
 }
 
 void AIEnemy::stopFire()
@@ -53,10 +57,12 @@ void AIEnemy::stopFire()
 
 void AIEnemy::getPlayerInformation(Player* player)
 {
-	if (CreateRoomScene::AIorPerson == 1) {
+	if (CreateRoomScene::AIorPerson == 1) 
+	{
 		informationOfPlayer = player->sendPlayerInformation();
 	}
-	else {
+	else 
+	{
 		Client::getInstance()->sendInfo(player->sendPlayerInformation().toString());
 	}
 	return;
@@ -64,62 +70,52 @@ void AIEnemy::getPlayerInformation(Player* player)
 
 void AIEnemy::actByAI()
 {
-	auto playerPosition = informationOfPlayer.getPosition();
-	if (this->getGun()->getBullets() == 0)
+	clock_t now = clock();
+	int mapId = UserDefault::getInstance()->getIntegerForKey(MAPID) - MAP1;
+	auto playerPosition = Vec2(informationOfPlayer.getPosition().x, informationOfPlayer.getPosition().y - 44);
+	auto aiPosition = Vec2(this->getPosition().x, this->getPosition().y - this->getContentSize().height / 2);
+	int controlDistance = 200;
+	Vec2 distance = { 0,0 };
+	if (playerPosition.y < GameScene::mapEdge[mapId].begin()->edgePos.y)
+		playerPosition.y = 900;
+	distance = aiPosition - playerPosition;
+	if (distance.y < -260) {
+		//find way to jump up
+		std::vector<EdgePosition>::iterator minMapFloor = GameScene::mapEdge[mapId].begin();
+		std::vector<EdgePosition>::iterator MapFloor = GameScene::mapEdge[mapId].begin();
+		for (; MapFloor != GameScene::mapEdge[mapId].end(); MapFloor++) {
+			if (MapFloor->edgePos.y - aiPosition.y > 110 && MapFloor->edgePos.y - aiPosition.y < 150 && this->getIsJumping() == false) {
+				minMapFloor = MapFloor;
+				break;
+			}
+		}
+		playerPosition = minMapFloor->edgePos;
+		controlDistance = 10;
+		distance = aiPosition - playerPosition;
+	}
+	if (this->getGun()->getBullets() == 0 && GameScene::_box->isVisible()) {
 		playerPosition = GameScene::_box->getPosition();
-	auto upPosition = this->getPosition().y + this->getContentSize().height / 2;
-	auto downPosition = this->getPosition().y - this->getContentSize().height / 2;
-	if (playerPosition.y >= downPosition && playerPosition.y <= upPosition)
-		this->fire();
-	
-	if (fabs(this->getPosition().x - playerPosition.x) < Director::getInstance()->getVisibleSize().width / 10 + 2)
-	{
-
-		if (fabs(this->getPosition().x - playerPosition.x - Director::getInstance()->getVisibleSize().width / 10) == 0)
-			flag = -1;
-		else if (fabs(this->getPosition().x - playerPosition.x + Director::getInstance()->getVisibleSize().width / 10) == 0)
-			flag = 1;
-		else if (!flag && fabs(this->getPosition().x - playerPosition.x) < Director::getInstance()->getVisibleSize().width / 10)
-			flag = (this->getPosition().x - playerPosition.x > 0 ? -1 : 1);
-		if (flag == -1)
+		controlDistance = 10;
+		distance = aiPosition - playerPosition;
+	}
+	if (fabs(distance.x) > controlDistance && now - damageTime >= 200 && now - fireTime >= 100) {
+		if (distance.x > 0)
 			this->moveOnGround({ -300.0f,this->getPhysicsBody()->getVelocity().y });
-		else if (flag == 1)
-			this->moveOnGround({ 300.0f,this->getPhysicsBody()->getVelocity().y });
 		else
-		{
-			if (this->getPosition().x < playerPosition.x && fabs(this->getPhysicsBody()->getVelocity().y) <= 1e-5 && this->getPosition().y < Director::getInstance()->getVisibleSize().height)
-				this->moveOnGround({ 300.0f,this->getPhysicsBody()->getVelocity().y });
-			else if (fabs(this->getPhysicsBody()->getVelocity().y) <= 1e-5 && this->getPosition().y < Director::getInstance()->getVisibleSize().height)
-				this->moveOnGround({ -300.0f,this->getPhysicsBody()->getVelocity().y });
-		}
-	}
-	else
-	{
-		flag = 0;
-		if (this->getPosition().x < playerPosition.x && fabs(this->getPhysicsBody()->getVelocity().y) <= 1e-5 && this->getPosition().y < Director::getInstance()->getVisibleSize().height)
 			this->moveOnGround({ 300.0f,this->getPhysicsBody()->getVelocity().y });
-		else if (fabs(this->getPhysicsBody()->getVelocity().y) <= 1e-5 && this->getPosition().y < Director::getInstance()->getVisibleSize().height)
-			this->moveOnGround({ -300.0f,this->getPhysicsBody()->getVelocity().y });
 	}
-
-
-	if (jumpFlag && (this->getPhysicsBody()->getVelocity().y + 1 < 0 || (fabs(this->getPhysicsBody()->getVelocity().y) < 1e-5 && playerPosition.y - this->getPosition().y > Director::getInstance()->getVisibleSize().height / 5)))
+	if (distance.y >= 110 && !this->getIsIntheAir() && fabs(getPhysicsBody()->getVelocity().y) < 1e-5) {
+		this->jumpDown();
+	}
+	else if (fabs(distance.y) < 20) {
+		if (controlDistance == 200)
+			this->fire();
+	}
+	else if (distance.y <= -50) {
 		this->jumpUp();
-	if (this->getPosition().y > playerPosition.y + Director::getInstance()->getVisibleSize().height / 5 && this->getPosition().y + 200 < Director::getInstance()->getVisibleSize().height)
-	{
-		if (fabs(this->getPhysicsBody()->getVelocity().y) < 1e-5 && this->getPosition().y > Director::getInstance()->getVisibleSize().height / 5)
-		{
-			this->jumpDown();
-			jumpFlag = 0;
-		}
-
 	}
-	else if (fabs(this->getPhysicsBody()->getVelocity().y) < 1e-5)
-		jumpFlag = 1;
 	return;
 }
-
-
 
 void AIEnemy::actByFriend(std::string infom)
 {
@@ -130,11 +126,11 @@ void AIEnemy::actByFriend(std::string infom)
 		return;
 	}
 	log(info.c_str());
-	
+
 	auto x = Value(info.substr(0, 12)).asFloat();
 	auto y = Value(info.substr(13, 12)).asFloat();
 	bool isFire;
-	if (info.substr(26,5).compare("false") == 0) {
+	if (info.substr(26, 5).compare("false") == 0) {
 		isFire = false;
 	}
 	else {
@@ -160,5 +156,5 @@ void AIEnemy::actByFriend(std::string infom)
 	if (isFire) {
 		this->fire();
 	}
-	
+
 }

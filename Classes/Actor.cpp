@@ -6,7 +6,6 @@
 #include "SystemHeader.h"
 #include "loseScene.h"
 #include "winScene.h"
-#include "CreateRoomScene.h"
 USING_NS_CC;
 #define SPEED_LEFT -400
 #define SPEED_RIGHT 400
@@ -101,16 +100,7 @@ void Actor::moveOnGround(Vec2 speed)
 {
 	_physicsBody->setVelocity(speed);
 	this->setFlippedX(speed.x < 0);
-	this->getGun()->setFlippedX(speed.x <0);
-	/*
-	if (CreateRoomScene::AIorPerson == 2) {
-		if (AIEnemy::leftOrRight == 1) {
-			this->getGun()->setFlippedX(true);
-		}
-		else {
-			this->getGun()->setFlippedX(false);
-		}
-	}*/
+	this->getGun()->setFlippedX(speed.x < 0);
 	this->getGun()->setPosition(this->getPosition().x + (speed.x > 0 ? 1 : -1) * (gun->getContentSize().width / 2 + this->getContentSize().width / 2), this->getPosition().y);
 	PhysicsJointFixed* joint = PhysicsJointFixed::construct(this->getPhysicsBody(), this->getGun()->getPhysicsBody(), this->getPosition());
 	GameScene::physicsWorld->removeJoint(this->_joint, true);
@@ -162,6 +152,7 @@ void Actor::fallOnGroundEffect()
 //受伤的效果
 void Actor::damagedEffect(int damage)
 {
+	damageTime = clock();
 	auto emitter = ParticleExplosion::create();
 	emitter->setLife(0.1f);
 	emitter->setLifeVar(0.5f);
@@ -374,19 +365,18 @@ void Actor::reLive(bool flag)
 	{
 		int currentLive = this->getRemainingLive() - 1;
 		this->setGun(this->getGun());
-		/*
 		if (currentLive == 0)
 		{
 			auto scene = flag ? loseScene::createScene() : winScene::createScene();
 			//			log("you lose");//跳转
 			Director::getInstance()->pushScene(scene);
-		}*/
+		}
 		this->setRemainingLive(currentLive);
 		this->setBloodLeft(100);
 		log("%d", currentLive);
 		this->setPosition(visibleSize.width / 4, visibleSize.height + this->getContentSize().height);
-
 		this->getPhysicsBody()->setVelocity({ 0,0 });
+		this->setGun(gun);
 	}
 	return;
 }
@@ -417,3 +407,4 @@ void Actor::renewBrand()
 	bloodBar->setPercent(_bloodLeft);
 	return;
 }
+

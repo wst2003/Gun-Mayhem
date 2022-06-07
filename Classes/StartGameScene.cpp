@@ -25,6 +25,7 @@ Scene* StartGameScene::createScene()
 	return scene;
 }
 
+
 // on "init" you need to initialize your instance
 bool StartGameScene::init()
 {
@@ -36,7 +37,6 @@ bool StartGameScene::init()
 	}
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
 
 	auto backGround = Sprite::create("originalbg.png");
 	backGround->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
@@ -110,4 +110,3 @@ void StartGameScene::rankingSceneCallBack(Ref* r)
 	auto RankingScene = RankingScene::createScene();
 	Director::getInstance()->pushScene(RankingScene);
 }
-

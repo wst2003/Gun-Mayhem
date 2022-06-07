@@ -9,6 +9,7 @@ struct GunAttribute
 	float damageValue;	//伤害值
 	float recoilValue;	//后坐力值
 	float velocity;		//运动(初)速度
+	float impulse;
 };
 
 class ActorInformation
@@ -29,6 +30,6 @@ private:
 	bool _isFire;
 	int _gunType;
 	int remainLive;
-	int leftOrRight=2;
+	int leftOrRight = 2;
 };
 

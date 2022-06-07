@@ -7,7 +7,7 @@ class Client :public cocos2d::network::SocketIO::SIODelegate
 {
 public:
 	static Client* getInstance();
-	
+
 	virtual void onConnect(cocos2d::network::SIOClient* client);
 	virtual void onMessage(cocos2d::network::SIOClient* client, const std::string& data);
 	virtual void onClose(cocos2d::network::SIOClient* client);
@@ -21,9 +21,9 @@ public:
 	void loginLegally(std::string ID);
 
 	void addFriendRequest(std::string ID);
-	void getAddFriendResult(cocos2d::network::SIOClient* client, const std::string& reply) ;
+	void getAddFriendResult(cocos2d::network::SIOClient* client, const std::string& reply);
 	void sendTextToFriend(std::string& text, std::string friendID);
-	void getTextFromFriend(cocos2d::network::SIOClient* client, const std::string& text) ;
+	void getTextFromFriend(cocos2d::network::SIOClient* client, const std::string& text);
 
 	void readRankingRequest(const std::string& ID);
 	void getRankingData(cocos2d::network::SIOClient* client, const std::string& text);
@@ -40,7 +40,7 @@ public:
 	static bool getIsRegister();
 	static bool getIsLogin();
 	std::string myID;
-	std::string friendID="";
+	std::string friendID = "";
 	bool hasNewChatText = false;
 	std::string textFromFriend = "";
 private:
@@ -50,6 +50,6 @@ private:
 	std::string serverIp;
 
 
-	static bool isRegister ;
-	static bool isLogin ;
+	static bool isRegister;
+	static bool isLogin;
 };

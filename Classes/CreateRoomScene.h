@@ -17,15 +17,15 @@ public:
 
 	void sendInvitionCallBack(Ref* r);
 
-	void toFirstPlayer(Ref* r) ;
-	void toSecondPlayer(Ref* r) ;
+	void toFirstPlayer(Ref* r);
+	void toSecondPlayer(Ref* r);
 
 
 	ui::EditBox* IDQueryEdixBox;
 	Label* inviteFriendStatusLabel;
 
 	void findCallBack(Ref* r);
-	
+
 	static bool isInvited;
 	void updateGetInvited(float dt);
 
@@ -42,7 +42,7 @@ public:
 	Label* myPlayerLabel = Label::create();
 	Label* friendPlayerLabel = Label::create();
 	//提示信息，是否找到好友
-	Label* findFriendStatusLabel=Label::create();
+	Label* findFriendStatusLabel = Label::create();
 	static int myNum;
 	static int friendNum;
 	static int AIorPerson;

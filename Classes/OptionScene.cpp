@@ -100,12 +100,14 @@ void OptionScene::soundButtonOnCallBack(Ref* r)
 	MenuItemImage* onButton = (MenuItemImage*)r;
 	offButtonSound->setEnabled(true);
 	onButton->setEnabled(false);
+	UserDefault::getInstance()->setBoolForKey(SOUND_KEY, false);
 }
 void OptionScene::soundButtonOffCallBack(Ref* r)
 {
 	MenuItemImage* offButton = (MenuItemImage*)r;
 	onButtonSound->setEnabled(true);
 	offButton->setEnabled(false);
+	UserDefault::getInstance()->setBoolForKey(SOUND_KEY, true);
 }
 void OptionScene::backCallBack(Ref* r)
 {

@@ -8,7 +8,7 @@ using namespace  cocos2d::network;
 
 int CreateRoomScene::myNum = 0;
 int CreateRoomScene::friendNum = 0;
-int CreateRoomScene::AIorPerson= 0;
+int CreateRoomScene::AIorPerson = 0;
 bool CreateRoomScene::isInvited = 0;
 
 Scene* CreateRoomScene::createScene()
@@ -41,8 +41,8 @@ bool CreateRoomScene::init()
 	auto selectPlayerMenu = Menu::create(P1MenuItem, P2MenuItem, NULL);
 	this->addChild(selectPlayerMenu, 1);
 
-	firstPlayer->setPosition(Vec2(P1MenuItem->getPosition().x+visibleSize.width/2, P1MenuItem->getPosition().y+ visibleSize.height / 2));
-	secondPlayer->setPosition(Vec2(P2MenuItem->getPosition().x + visibleSize.width / 2, P2MenuItem->getPosition().y+ visibleSize.height / 2));
+	firstPlayer->setPosition(Vec2(P1MenuItem->getPosition().x + visibleSize.width / 2, P1MenuItem->getPosition().y + visibleSize.height / 2));
+	secondPlayer->setPosition(Vec2(P2MenuItem->getPosition().x + visibleSize.width / 2, P2MenuItem->getPosition().y + visibleSize.height / 2));
 	firstPlayer->setVisible(false);
 	secondPlayer->setVisible(false);
 
@@ -59,9 +59,9 @@ bool CreateRoomScene::init()
 	auto AIMenuItem = MenuItemFont::create("AI",
 		[this](Ref* r) {this->friendPlayerLabel->setVisible(true),
 		this->friendPlayerLabel->setString(Value(this->friendNum).asString() + "P: AI"), AIorPerson = 1; });
-	
-	AIMenuItem->setPosition(Vec2(visibleSize.width / 2 - 100, visibleSize.height/2 - 100));
-	
+
+	AIMenuItem->setPosition(Vec2(visibleSize.width / 2 - 100, visibleSize.height / 2 - 100));
+
 	auto AIMenu = Menu::create(AIMenuItem, NULL);
 	this->addChild(AIMenu, 2);
 
@@ -74,13 +74,13 @@ bool CreateRoomScene::init()
 	IDQueryEdixBox->setFontColor(Color3B::BLACK);//设置输入字体的颜色
 	this->addChild(IDQueryEdixBox, 1);
 
-	auto queryMenuItem = MenuItemFont::create("find",CC_CALLBACK_1(CreateRoomScene::findCallBack,this));
+	auto queryMenuItem = MenuItemFont::create("find", CC_CALLBACK_1(CreateRoomScene::findCallBack, this));
 	queryMenuItem->setPosition(Vec2(400, 350));
 	auto queryMenu = Menu::create(queryMenuItem, NULL);
 	this->addChild(queryMenu, 2);
-	
+
 	findFriendStatusLabel->setPosition(Vec2(800, 400));
-	this->addChild(findFriendStatusLabel,1);
+	this->addChild(findFriendStatusLabel, 1);
 
 	auto backMenuItem = MenuItemFont::create("BACK", CC_CALLBACK_1(CreateRoomScene::backCallBack, this));
 	backMenuItem->setPosition(Vec2(-400, -350));
@@ -107,7 +107,7 @@ void CreateRoomScene::toFirstPlayer(Ref* r)
 	this->myPlayerLabel->setPosition(Vec2(this->firstPlayer->getPosition()) + Vec2(100, 20));
 	this->myPlayerLabel->setVisible(true);
 	this->myPlayerLabel->setString("1P: " + Client::getInstance()->myID);
-	
+
 	this->friendPlayerLabel->setPosition(Vec2(this->secondPlayer->getPosition()) + Vec2(100, 20));
 }
 
@@ -143,8 +143,8 @@ void CreateRoomScene::updateFindFriendStatus(float dt)
 		Size visibleSize = Director::getInstance()->getVisibleSize();
 		auto friendMenuItem = MenuItemFont::create(Client::getInstance()->friendID,
 			[this](Ref* r) {this->friendPlayerLabel->setVisible(true),
-			this->friendPlayerLabel->setString(Value(this->friendNum).asString() + "P:"+ Client::getInstance()->friendID)
-			, AIorPerson=2,Client::getInstance()->inviteFriend(Client::getInstance()->friendID); });
+			this->friendPlayerLabel->setString(Value(this->friendNum).asString() + "P:" + Client::getInstance()->friendID)
+			, AIorPerson = 2, Client::getInstance()->inviteFriend(Client::getInstance()->friendID); });
 
 		friendMenuItem->setPosition(Vec2(visibleSize.width / 2 - 100, visibleSize.height / 2 - 150));
 		auto friendMenu = Menu::create(friendMenuItem, NULL);

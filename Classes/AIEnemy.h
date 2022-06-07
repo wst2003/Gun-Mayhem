@@ -18,7 +18,6 @@ public:
 	void getPlayerInformation(Player* player);	//获取玩家的人物信息
 	void actByAI();	//AI算法，根据用户行为做出响应
 	void actByFriend(std::string info);
-
 	static int leftOrRight;
 protected:
 	virtual Animate* createFireAnimate(int gunType) { return nullptr; };		//创建开火动画
@@ -28,7 +27,4 @@ private:
 	ActorInformation informationOfPlayer;
 	int flag;
 	int jumpFlag = 1;
-	
-		
-	
 };

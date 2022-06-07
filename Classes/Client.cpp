@@ -112,7 +112,7 @@ void Client::loginLegally(std::string ID)
 	_sioClient->emit("login", ID);
 }
 
-void Client::addFriendRequest(std::string ID)
+void Client::addFriendRequest(std::string ID) 
 {
 	_sioClient->emit("getAddFriendRequest", { myID,ID });
 }
@@ -174,7 +174,7 @@ void Client::getRankingData(cocos2d::network::SIOClient* client, const std::stri
 
 void Client::inviteFriend(const std::string& ID)
 {
-	_sioClient->emit("getInviteFriendRequest", {this->myID,this->friendID,Value(CreateRoomScene::friendNum).asString()});
+	_sioClient->emit("getInviteFriendRequest", { this->myID,this->friendID,Value(CreateRoomScene::friendNum).asString() });
 }
 
 void Client::getInviteFriend(cocos2d::network::SIOClient* client, const std::string& ID)
@@ -184,7 +184,7 @@ void Client::getInviteFriend(cocos2d::network::SIOClient* client, const std::str
 	data.erase(data.begin());
 	data.erase(data.end() - 1);
 	auto fID = data.substr(0, data.length() - 1);
-	auto myNum = Value(data.substr(data.length(),1 )).asInt();
+	auto myNum = Value(data.substr(data.length(), 1)).asInt();
 	log((fID + data.substr(data.length(), 1)).c_str());
 	CreateRoomScene::isInvited = true;
 	CreateRoomScene::myNum = myNum;
