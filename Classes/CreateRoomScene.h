@@ -55,7 +55,7 @@ public:
 	//1p、2p的标签
 	Label* myPlayerLabel;
 	Label* friendPlayerLabel;
-	
+
 	//提示信息，是否找到好友
 	Label* findFriendStatusLabel = Label::create();
 	static int myNum;
@@ -66,4 +66,3 @@ public:
 };
 
 #endif
-#pragma once

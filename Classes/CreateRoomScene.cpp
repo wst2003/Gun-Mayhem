@@ -33,9 +33,9 @@ bool CreateRoomScene::init()
 	//添加背景
 	auto bgForRoom = Sprite::create("roomBG.png");
 	bgForRoom->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
-	this->addChild(bgForRoom,0);
+	this->addChild(bgForRoom, 0);
 
-	
+
 	auto P1MenuItem = MenuItemImage::create("plusButton.png", "plusButton.png",
 		CC_CALLBACK_1(CreateRoomScene::toFirstPlayer, this));
 	//P1MenuItem->setPosition(Vec2(-200, 100));
@@ -53,12 +53,12 @@ bool CreateRoomScene::init()
 	secondPlayer->setPosition(PosP2);
 	aiPlayer_first->setPosition(PosP1);
 	aiPlayer_second->setPosition(PosP2);
-    firstPlayer->setVisible(false);
+	firstPlayer->setVisible(false);
 	secondPlayer->setVisible(false);
 	aiPlayer_first->setVisible(false);
 	aiPlayer_second->setVisible(false);
 
-    TTFConfig ttfConfig{ "fonts/Marker Felt.ttf",60 };
+	TTFConfig ttfConfig{ "fonts/Marker Felt.ttf",60 };
 	myPlayerLabel = Label::createWithTTF(ttfConfig, "");
 	friendPlayerLabel = Label::createWithTTF(ttfConfig, "");
 	//myPlayerLabel->setSystemFontSize(60);
@@ -79,7 +79,7 @@ bool CreateRoomScene::init()
 	auto AIMenuItem = MenuItemFont::create("+AI",
 		CC_CALLBACK_1(CreateRoomScene::aiPlayerCallBack, this));
 	auto AIMenu = Menu::create(AIMenuItem, NULL);
-     AIMenu->setPosition(Vec2(450, 260));
+	AIMenu->setPosition(Vec2(450, 260));
 	this->addChild(AIMenu, 2);
 
 	IDQueryEdixBox = ui::EditBox::create(Size(150, 50), ui::Scale9Sprite::create("chatBg.png"));
@@ -100,18 +100,18 @@ bool CreateRoomScene::init()
 	findFriendStatusLabel->setPosition(Vec2(800, 400));
 	this->addChild(findFriendStatusLabel, 1);
 
-	
+
 	auto backMenuItem = MenuItemImage::create("back.png", "back_selected.png", "back.png",
 		CC_CALLBACK_1(CreateRoomScene::backCallBack, this));
 	auto backMenu = Menu::create(backMenuItem, NULL);
-    backMenu->setPosition(Vec2(visibleSize.width * 1 / 10 + 30, visibleSize.height * 1 / 8 - 50));
+	backMenu->setPosition(Vec2(visibleSize.width * 1 / 10 + 30, visibleSize.height * 1 / 8 - 50));
 	this->addChild(backMenu, 2);
 
 	auto startMenuItem = MenuItemImage::create
 	("start button.png", "start button selected.png", "start button.png",
 		CC_CALLBACK_1(CreateRoomScene::startGameCallBack, this));
 	auto startMenu = Menu::create(startMenuItem, NULL);
-    startMenu->setPosition(Vec2(visibleSize.width * 1 / 10 + 1030, visibleSize.height * 1 / 8 -40));
+	startMenu->setPosition(Vec2(visibleSize.width * 1 / 10 + 1030, visibleSize.height * 1 / 8 - 40));
 	this->addChild(startMenu, 2);
 
 	this->schedule(CC_CALLBACK_1(CreateRoomScene::updateGetInvited, this), 0.1, "updateGetInvited");
@@ -168,21 +168,23 @@ void CreateRoomScene::updateFindFriendStatus(float dt)
 {
 	/*刷新是否找到好友，若找到则附加一个菜单项在AI下面*/
 	if (Client::getInstance()->friendID.length() > 0) {
-		findFriendStatusLabel->setString("Friend " + Client::getInstance()->friendID + "\n is found!");
+		//findFriendStatusLabel->setString("Friend " + Client::getInstance()->friendID + "\n is found!");
 		this->firstPlayer->setVisible(true);
 		this->secondPlayer->setVisible(true);
 		Size visibleSize = Director::getInstance()->getVisibleSize();
 		auto friendMenuItem = MenuItemFont::create(Client::getInstance()->friendID,
 			[this](Ref* r) {this->friendPlayerLabel->setVisible(true),
-			this->friendPlayerLabel->setString(Value(this->friendNum).asString() + "P:" + Client::getInstance()->friendID)
+			this->friendPlayerLabel->setString(Client::getInstance()->friendID)
 			, AIorPerson = 2, Client::getInstance()->inviteFriend(Client::getInstance()->friendID); });
 
+		friendMenuItem->setFontSize(50);
+		friendMenuItem->setColor(Color3B::BLACK);
 		friendMenuItem->setPosition(Vec2(visibleSize.width / 2 - 100, visibleSize.height / 2 - 150));
 		auto friendMenu = Menu::create(friendMenuItem, NULL);
 		this->addChild(friendMenu, 2);
 	}
 	else {
-		findFriendStatusLabel->setString("Friend " + Client::getInstance()->friendID + "\n is not found!");
+		//findFriendStatusLabel->setString("Friend " + Client::getInstance()->friendID + "\n is not found!");
 	}
 }
 
@@ -229,7 +231,7 @@ void CreateRoomScene::startGameCallBack(Ref* r)
 void CreateRoomScene::aiPlayerCallBack(Ref* r)
 {
 	//ai键只有在自己角色已经添加，并且朋友角色未添加,ai未添加的时候起效
-	if (myPlayerAdded&&!friendPlayerAdded&&!AIPlayerAdded)
+	if (myPlayerAdded && !friendPlayerAdded && !AIPlayerAdded)
 	{
 		if (myPlayerLabel->getPosition() == PosL1)
 		{
