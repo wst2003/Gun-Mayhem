@@ -11,6 +11,7 @@ using namespace  cocos2d::network;
 
 std::vector<Label*> RankingScene::rankingLabels = {};
 std::vector<std::string>RankingScene::rankingData = {};
+int RankingScene::isMeWin = 0;
 
 Scene* RankingScene::createScene()
 {
@@ -45,8 +46,8 @@ bool RankingScene::init()
 	this->addChild(mnBackMenu, 1);
 
 
-	rankingData = { "1   600","23   500","345   400" ,"2052","200","110","100","123","456" };
-
+	//rankingData1 = { "1   600","23   500","345   400" ,"2052","200","110","100","123","456" };
+	
 	this->schedule(CC_CALLBACK_1(RankingScene::updateRankingLabels, this), 0.1, "upNewText");
 
 	return true;
@@ -58,8 +59,10 @@ void RankingScene::backCallBack(Ref* r)
 
 void RankingScene::updateRankingLabels(float dt)
 {
+	rankingData1 = reshapeRankingData(rankingData);
+
 	this->rankingLabels.clear();
-	for (auto ranking : this->rankingData) {
+	for (auto ranking : this->rankingData1) {
 		auto aLabel = Label::create();
 		aLabel->setString(ranking);
 		this->rankingLabels.push_back(aLabel);
@@ -69,13 +72,13 @@ void RankingScene::updateRankingLabels(float dt)
 	this->rankingLabels[1]->setTextColor(Color4B::BLACK);
 	this->rankingLabels[1]->setScaleX(4);
 	this->rankingLabels[1]->setScaleY(4);
-	this->rankingLabels[1]->setPosition(970, 550);
+	this->rankingLabels[1]->setPosition(680, 740);
 	this->addChild(rankingLabels[1], 1);
 
 	this->rankingLabels[0]->setTextColor(Color4B::BLACK);
 	this->rankingLabels[0]->setScaleX(3.8);
 	this->rankingLabels[0]->setScaleY(3.8);
-	this->rankingLabels[0]->setPosition(1055, 485);
+	this->rankingLabels[0]->setPosition(765, 670);
 	this->addChild(rankingLabels[0], 1);
 
 	this->rankingLabels[3]->setTextColor(Color4B::BLACK);
@@ -93,13 +96,13 @@ void RankingScene::updateRankingLabels(float dt)
 	this->rankingLabels[5]->setTextColor(Color4B::BLACK);
 	this->rankingLabels[5]->setScaleX(4);
 	this->rankingLabels[5]->setScaleY(4);
-	this->rankingLabels[5]->setPosition(680, 740);
+	this->rankingLabels[5]->setPosition(970, 550);
 	this->addChild(rankingLabels[5], 1);
 
 	this->rankingLabels[4]->setTextColor(Color4B::BLACK);
 	this->rankingLabels[4]->setScaleX(3.8);
 	this->rankingLabels[4]->setScaleY(3.8);
-	this->rankingLabels[4]->setPosition(765, 670);
+	this->rankingLabels[4]->setPosition(1055, 485);
 	this->addChild(rankingLabels[4], 1);
 
 	for (int i = 0; i < this->rankingLabels.size() - 6; i++) {
@@ -109,4 +112,39 @@ void RankingScene::updateRankingLabels(float dt)
 		this->rankingLabels[i + 6]->setPosition(680, 400 - 105 * i);
 		this->addChild(rankingLabels[i + 6], 1);
 	}
+}
+
+std::vector<std::string> RankingScene::reshapeRankingData(std::vector<std::string>rankingData)
+{
+	
+	std::vector<std::string> data = {};
+	for (int i = 0; i < (rankingData.size() >= 6 ? 6 : rankingData.size()); i++) {
+		auto index = rankingData[i].find_first_of(' ', 0);
+		auto index1 = rankingData[i].find_last_of(' ');
+		auto ID = rankingData[i].substr(0, index);
+		auto score = rankingData[i].substr(index1 + 1, rankingData[i].length() - index1 - 1);
+		if (isMeWin==1&&(ID.compare(Value(Client::getInstance()->myID).asString())==0)) {
+			score = Value(Value(score).asInt() + 10).asString();
+		}
+		else if (isMeWin == 2 && (ID.compare(Value(Client::getInstance()->myID).asString()) == 0)) {
+			score = Value(Value(score).asInt() - 10).asString();
+		}
+
+		if (isMeWin == 1 && (ID.compare(Value(Client::getInstance()->friendID).asString()) == 0)) {
+			score = Value(Value(score).asInt() - 10).asString();
+		}
+		else if (isMeWin == 2 && (ID.compare(Value(Client::getInstance()->friendID).asString()) == 0)) {
+			score = Value(Value(score).asInt() + 10).asString();
+		}
+
+		if (i < 3) {
+			//后面三个
+		data.push_back(ID+"   "+score);
+		}
+		else {
+			data.push_back(ID);
+			data.push_back(score);
+		}
+	}
+	return data;
 }

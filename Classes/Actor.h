@@ -56,7 +56,7 @@ public:
 	Label* nameLabel;
 	Label* bulletsLeftLabel;
 	Label* livesLeftLabel;
-
+	static bool isDie5 ;
 protected:
 	virtual Animate* createFireAnimate(int gunType) { return 0; };		//创建开火动画
 	virtual Animate* createStopFireAnimate(int gunType) { return 0; };
@@ -80,4 +80,7 @@ protected:
 
 	clock_t damageTime;
 	clock_t fireTime;
+
+	bool isLive = true;
+	
 };

@@ -2,6 +2,7 @@
 #include "Player.h"
 #include "GameScene.h"
 #include "SystemHeader.h"
+#include"Actor.h"
 USING_NS_CC;
 
 //得到人物信息
@@ -41,6 +42,7 @@ void Player::actByKeyBoard(std::map<EventKeyboard::KeyCode, bool>& keyMap)
 {
 	auto now = clock();
 	auto velocity = _physicsBody->getVelocity();
+	
 	if ((keyMap[LEFT_KEY] || keyMap[A_KEY]) && now - damageTime >= 200 && now - fireTime >= 100)
 	{
 		this->moveOnGround({ -400,this->getPhysicsBody()->getVelocity().y });

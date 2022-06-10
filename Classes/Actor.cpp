@@ -5,13 +5,14 @@
 #include "GameScene.h"
 #include "SystemHeader.h"
 #include "loseScene.h"
+#include"CreateRoomScene.h"
 #include "winScene.h"
 USING_NS_CC;
 #define SPEED_LEFT -400
 #define SPEED_RIGHT 400
 #define SPEED_UP 950
 
-
+bool Actor::isDie5 = false;
 //创建人物
 Actor* Actor::createActorWithPhysicsBody(const std::string& filename)
 {
@@ -361,22 +362,53 @@ void Actor::setID(int id)
 void Actor::reLive(bool flag)
 {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
-	if (this->getPosition().y < 0 || getBloodLeft() == 0)
-	{
-		int currentLive = this->getRemainingLive() - 1;
-		this->setGun(this->getGun());
-		if (currentLive == 0)
+	if (CreateRoomScene::AIorPerson == 2) {
+		if (this->getPosition().y > visibleSize.height + this->getContentSize().height + 100)
 		{
-			auto scene = flag ? loseScene::createScene() : winScene::createScene();
-			//			log("you lose");//跳转
-			Director::getInstance()->pushScene(scene);
+			isLive = true;
 		}
-		this->setRemainingLive(currentLive);
-		this->setBloodLeft(100);
-		log("%d", currentLive);
-		this->setPosition(visibleSize.width / 4, visibleSize.height + this->getContentSize().height);
-		this->getPhysicsBody()->setVelocity({ 0,0 });
-		this->setGun(gun);
+		if ((this->getPosition().y < 100 || getBloodLeft() == 0) && isLive)
+		{
+			if (getBloodLeft() == 0) {
+				this->setPosition(Vec2(0, -1));
+			}
+			isLive = false;
+			int currentLive = this->getRemainingLive() - 1;
+			this->setGun(this->getGun());
+			if (currentLive == 0)
+			{
+				auto scene = flag ? loseScene::createScene() : winScene::createScene();
+				//			log("you lose");//跳转
+				Director::getInstance()->pushScene(scene);
+			}
+			this->setRemainingLive(currentLive);
+			this->setBloodLeft(100);
+			log("Enemy:%d", currentLive);
+		}
+		if (this->getPosition().y < 0) {
+			this->setPosition(visibleSize.width / 4, visibleSize.height + this->getContentSize().height + 200);
+			this->getPhysicsBody()->setVelocity({ 0,0 });
+			this->setGun(gun);
+		}
+	}
+	else {
+		if (this->getPosition().y < 0 || getBloodLeft() == 0)
+		{
+			int currentLive = this->getRemainingLive() - 1;
+			this->setGun(this->getGun());
+			if (currentLive == 0)
+			{
+				auto scene = flag ? loseScene::createScene() : winScene::createScene();
+				//			log("you lose");//跳转
+				Director::getInstance()->pushScene(scene);
+			}
+			this->setRemainingLive(currentLive);
+			this->setBloodLeft(100);
+			log("%d", currentLive);
+			this->setPosition(visibleSize.width / 4, visibleSize.height + this->getContentSize().height);
+			this->getPhysicsBody()->setVelocity({ 0,0 });
+			this->setGun(gun);
+		}
 	}
 	return;
 }

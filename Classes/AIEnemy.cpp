@@ -133,7 +133,7 @@ void AIEnemy::actByFriend(std::string infom)
 	if (info.substr(26, 5).compare("false") == 0) {
 		isFire = false;
 	}
-	else {
+	else if (info.substr(26, 4).compare("true") == 0) {
 		isFire = true;
 	}
 	int leftOrRight;

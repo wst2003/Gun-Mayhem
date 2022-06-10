@@ -1,6 +1,7 @@
 #pragma once
 #include "cocos2d.h"
 #include "network/SocketIO.h"
+#include "Actor.h"
 USING_NS_CC;
 
 class Client :public cocos2d::network::SocketIO::SIODelegate
@@ -37,6 +38,7 @@ public:
 	void sendInfo(const std::string& info);
 	void getInfo(cocos2d::network::SIOClient* client, const std::string& info);
 
+	
 	static bool getIsRegister();
 	static bool getIsLogin();
 	std::string myID;

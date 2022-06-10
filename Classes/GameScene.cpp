@@ -143,7 +143,12 @@ bool GameScene::init()
 			player->setPosition(visibleSize.width * 3 / 4, visibleSize.height + player->getContentSize().height);
 		}
 	}
-	player->setRemainingLive(5);
+	if (CreateRoomScene::AIorPerson == 1) {
+		player->setRemainingLive(5);
+	}
+	else {
+		player->setRemainingLive(6);
+	}
 	addChild(player);
 	player->setGun(playerGun);
 	player->setID(0);
@@ -152,6 +157,7 @@ bool GameScene::init()
 
 	//敌人
 	auto enemy = AIEnemy::createWithActor(Actor::createActorWithPhysicsBody("playerB.png"));
+	enemy->setTag(2222);
 	if (CreateRoomScene::AIorPerson == 1) 
 	{
 		enemy->setPosition(visibleSize.width * 3 / 4, visibleSize.height + enemy->getContentSize().height);
@@ -167,7 +173,12 @@ bool GameScene::init()
 			enemy->setPosition(visibleSize.width / 4, visibleSize.height + enemy->getContentSize().height);
 		}
 	}
-	enemy->setRemainingLive(5);
+	if (CreateRoomScene::AIorPerson == 1) {
+		enemy->setRemainingLive(5);
+	}
+	else {
+		enemy->setRemainingLive(6);
+	}
 	addChild(enemy);
 	this->_enemy = enemy;
 	enemy->setGun(enemyGun);
@@ -324,8 +335,7 @@ void GameScene::update(float dt)
 	//重生机制
 	_player->reLive(true);
 	_enemy->reLive();
-
-
+	
 	_player->changeBitMask();
 	_enemy->changeBitMask();
 	_player->setActorInformation();

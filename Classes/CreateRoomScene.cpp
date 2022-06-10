@@ -3,14 +3,12 @@
 #include "network/SocketIO.h"
 #include "CreateRoomScene.h"
 #include "GameScene.h"
-#include "GameNetScene.h"
-
 USING_NS_CC;
 using namespace  cocos2d::network;
 
 int CreateRoomScene::myNum = 0;
 int CreateRoomScene::friendNum = 0;
-int CreateRoomScene::AIorPerson= 0;
+int CreateRoomScene::AIorPerson = 0;
 bool CreateRoomScene::isInvited = 0;
 
 Scene* CreateRoomScene::createScene()
@@ -32,65 +30,57 @@ bool CreateRoomScene::init()
 	}
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-	auto bgForRoom = Sprite::create("roomBg.png");
-	bgForRoom->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
-	this->addChild(bgForRoom);
-	auto P1MenuItem = MenuItemImage::create("plusButton.png", "plusButton.png",
+
+	auto P1MenuItem = MenuItemImage::create("elements//add1p.png", "elements//add1p.png",
 		CC_CALLBACK_1(CreateRoomScene::toFirstPlayer, this));
-	//P1MenuItem->setPosition(Vec2(-200, 100));
-	auto P1menu = Menu::create(P1MenuItem,NULL);
-	P1menu->setPosition(Vec2(300, 640));
-	this->addChild(P1menu);
-	auto P2MenuItem = MenuItemImage::create("plusButton.png", "plusButton.png",
+	P1MenuItem->setPosition(Vec2(-200, 100));
+	auto P2MenuItem = MenuItemImage::create("elements//add2p.png", "elements//add2p.png",
 		CC_CALLBACK_1(CreateRoomScene::toSecondPlayer, this));
-	auto P2menu = Menu::create(P2MenuItem, NULL);
-	P2menu->setPosition(Vec2(1075, 450));
-	this->addChild(P2menu);
+	P2MenuItem->setPosition(Vec2(-200, 100 - P1MenuItem->getContentSize().height));
 
+	auto selectPlayerMenu = Menu::create(P1MenuItem, P2MenuItem, NULL);
+	this->addChild(selectPlayerMenu, 1);
 
-	myPlayer->setPosition(Pos1);
-	enemyPlayer->setPosition(Pos2);
-	myPlayer->setVisible(false);
-	enemyPlayer->setVisible(false);
-	AIPlayer->setVisible(false);
+	firstPlayer->setPosition(Vec2(P1MenuItem->getPosition().x + visibleSize.width / 2, P1MenuItem->getPosition().y + visibleSize.height / 2));
+	secondPlayer->setPosition(Vec2(P2MenuItem->getPosition().x + visibleSize.width / 2, P2MenuItem->getPosition().y + visibleSize.height / 2));
+	firstPlayer->setVisible(false);
+	secondPlayer->setVisible(false);
 
-	myPlayerLabel->setSystemFontSize(50);
-	friendPlayerLabel->setSystemFontSize(50);
+	myPlayerLabel->setSystemFontSize(30);
+	friendPlayerLabel->setSystemFontSize(30);
 	myPlayerLabel->setVisible(false);
 	friendPlayerLabel->setVisible(false);
 
-	this->addChild(myPlayer, 2);
-	this->addChild(enemyPlayer, 2);
-    this->addChild(AIPlayer, 2);
+	this->addChild(firstPlayer, 2);
+	this->addChild(secondPlayer, 2);
 	this->addChild(myPlayerLabel, 3);
 	this->addChild(friendPlayerLabel, 3);
 
-	auto AIMenuItem = MenuItemFont::create("+AI",
-		CC_CALLBACK_1(CreateRoomScene::aiPlayerCallBack, this));
-	AIMenuItem->setScaleX(2.0f);
-	AIMenuItem->setScaleY(2.0f);
+	auto AIMenuItem = MenuItemFont::create("AI",
+		[this](Ref* r) {this->friendPlayerLabel->setVisible(true),
+		this->friendPlayerLabel->setString(Value(this->friendNum).asString() + "P: AI"), AIorPerson = 1; });
 
+	AIMenuItem->setPosition(Vec2(visibleSize.width / 2 - 100, visibleSize.height / 2 - 100));
 
 	auto AIMenu = Menu::create(AIMenuItem, NULL);
-	AIMenu->setPosition(Vec2(450, 260));
 	this->addChild(AIMenu, 2);
 
-	IDQueryEdixBox = ui::EditBox::create(Size(150,50), ui::Scale9Sprite::create("chatBg.png"));
+	IDQueryEdixBox = ui::EditBox::create(Size(200, 70), ui::Scale9Sprite::create("chatBg.png"));
 	IDQueryEdixBox->setAnchorPoint(Point(0, 0));
-	IDQueryEdixBox->setPosition(Vec2(visibleSize.width * 1 / 9 +745, visibleSize.height * 7 / 10 + 102-495));
+	IDQueryEdixBox->setPosition(Vec2(visibleSize.width * 1 / 9 - 35, visibleSize.height * 7 / 10 + 102));
 	IDQueryEdixBox->setPlaceHolder("Enter ID:");//占位字符
 	IDQueryEdixBox->setMaxLength(25);
 	IDQueryEdixBox->setInputMode(EditBox::InputMode::NUMERIC);
 	IDQueryEdixBox->setFontColor(Color3B::BLACK);//设置输入字体的颜色
 	this->addChild(IDQueryEdixBox, 1);
 
-	auto queryMenuItem = MenuItemFont::create("Add",CC_CALLBACK_1(CreateRoomScene::findCallBack,this));
+	auto queryMenuItem = MenuItemFont::create("find", CC_CALLBACK_1(CreateRoomScene::findCallBack, this));
+	queryMenuItem->setPosition(Vec2(400, 350));
 	auto queryMenu = Menu::create(queryMenuItem, NULL);
-	queryMenu->setPosition(visibleSize.width * 1 / 9 - 35 + 980, visibleSize.height * 7 / 10 + 140 - 500);
 	this->addChild(queryMenu, 2);
-	
+
 	findFriendStatusLabel->setPosition(Vec2(800, 400));
-	this->addChild(findFriendStatusLabel,1);
+	this->addChild(findFriendStatusLabel, 1);
 
 	auto backMenuItem = MenuItemFont::create("BACK", CC_CALLBACK_1(CreateRoomScene::backCallBack, this));
 	backMenuItem->setPosition(Vec2(-400, -350));
@@ -109,73 +99,30 @@ bool CreateRoomScene::init()
 
 void CreateRoomScene::toFirstPlayer(Ref* r)
 {
-	if (myPlayerAdded == false&&!AIPlayerAdded&&!enemyPlayerAdded)
-	{
-		this->myPlayer->setFlippedX(false);
-		this->myPlayer->setVisible(true);
-		this->myPlayer->setPosition(Pos1);
-		this->enemyPlayer->setVisible(false);
-		CreateRoomScene::myNum = 1;
-		CreateRoomScene::friendNum = 2;
-		this->myPlayerAdded = true;
-		this->myPlayerLabel->setPosition(Pos1 + Vec2(140, 0));
-		this->myPlayerLabel->setVisible(true);
-		this->myPlayerLabel->setString("" + Client::getInstance()->myID);
-		this->friendPlayerLabel->setPosition(Pos2+Vec2(-110,0));
-		
-	}
-	else if(!AIPlayerAdded && !enemyPlayerAdded)
-	{
-		CreateRoomScene::myNum = 1;
-		CreateRoomScene::friendNum = 2;
-		this->myPlayer->setFlippedX(false);
-        this->myPlayer->setPosition(Pos1);
-		this->myPlayerLabel->setPosition(Pos1 + Vec2(140, 0));
-		this->myPlayerLabel->setString("" + Client::getInstance()->myID);
-		//this->myPlayerLabel->setVisible(true);
-		this->friendPlayerLabel->setPosition(Pos2 + Vec2(-110, 0));
-	}
-	/*
-	else
-	{
-		enemyPlayer->setPosition(Pos1);
-		this->enemyPlayer->setVisible(true);
-		CreateRoomScene::myNum = 1;
-		CreateRoomScene::friendNum = 2;
+	this->firstPlayer->setVisible(true);
+	this->secondPlayer->setVisible(false);
+	CreateRoomScene::myNum = 1;
+	CreateRoomScene::friendNum = 2;
 
-		this->friendPlayerLabel->setPosition(Vec2(this->enemyPlayer->getPosition()) + Vec2(100, 20));
-		this->friendPlayerLabel->setVisible(true);
-		this->friendPlayerLabel->setString("2P: " + Client::getInstance()->myID);
-		this->friendPlayerLabel->setPosition(Vec2(this->enemyPlayer->getPosition()) + Vec2(100, 20));
-	}*/
+	this->myPlayerLabel->setPosition(Vec2(this->firstPlayer->getPosition()) + Vec2(100, 20));
+	this->myPlayerLabel->setVisible(true);
+	this->myPlayerLabel->setString("1P: " + Client::getInstance()->myID);
+
+	this->friendPlayerLabel->setPosition(Vec2(this->secondPlayer->getPosition()) + Vec2(100, 20));
 }
 
 void CreateRoomScene::toSecondPlayer(Ref* r)
 {
-	if (myPlayerAdded == false && !AIPlayerAdded && !enemyPlayerAdded)
-	{
-		this->myPlayer->setFlippedX(true);
-		this->myPlayer->setVisible(true);
-		this->myPlayer->setPosition(Pos2);
-		this->enemyPlayer->setVisible(false);
-		CreateRoomScene::myNum = 2;
-		CreateRoomScene::friendNum = 1;
-		this->myPlayerAdded = true;
-		this->myPlayerLabel->setPosition(Pos2 + Vec2(-110, 0));
-		this->myPlayerLabel->setVisible(true);
-		this->myPlayerLabel->setString("" + Client::getInstance()->myID);
-		this->friendPlayerLabel->setPosition(Pos1 + Vec2(140, 0));
-	}
-	else if (!AIPlayerAdded && !enemyPlayerAdded)
-	{
-		CreateRoomScene::myNum = 2;
-		CreateRoomScene::friendNum = 1;
-		this->myPlayer->setFlippedX(true);
-		this->myPlayer->setPosition(Pos2);
-		this->myPlayerLabel->setPosition(Pos2 + Vec2(-110, 0));
-		this->myPlayerLabel->setString("" + Client::getInstance()->myID);
-		this->friendPlayerLabel->setPosition(Pos1 + Vec2(140, 0));
-	}
+	this->firstPlayer->setVisible(false);
+	this->secondPlayer->setVisible(true);
+	CreateRoomScene::myNum = 2;
+	CreateRoomScene::friendNum = 1;
+
+	this->myPlayerLabel->setPosition(Vec2(this->secondPlayer->getPosition()) + Vec2(100, 20));
+	this->myPlayerLabel->setVisible(true);
+	this->myPlayerLabel->setString("2P: " + Client::getInstance()->myID);
+
+	this->friendPlayerLabel->setPosition(Vec2(this->firstPlayer->getPosition()) + Vec2(100, 20));
 }
 
 void CreateRoomScene::findCallBack(Ref* r)
@@ -191,93 +138,49 @@ void CreateRoomScene::updateFindFriendStatus(float dt)
 	/*刷新是否找到好友，若找到则附加一个菜单项在AI下面*/
 	if (Client::getInstance()->friendID.length() > 0) {
 		findFriendStatusLabel->setString("Friend " + Client::getInstance()->friendID + "\n is found!");
-		if(!myPlayerAdded&&!AIPlayerAdded)
-		{
-			this->myPlayer->setVisible(true);
-			this->enemyPlayer->setVisible(true);
-			myPlayerAdded = true;
-			CreateRoomScene::myNum = 1;
-			CreateRoomScene::friendNum = 2;
-			this->myPlayerLabel->setPosition(Pos1 + Vec2(140, 0));
-			this->myPlayerLabel->setString("1P: " + Client::getInstance()->myID);
-			this->friendPlayerLabel->setPosition(Pos2 + Vec2(-60, 0));
-			this->friendPlayerLabel->setVisible(true);
-		}
-		else if (myPlayerAdded && !AIPlayerAdded)
-		{
-			if (this->myPlayer->getPosition() == Pos1)
-			{
-				this->enemyPlayer->setVisible(true);
-				this->friendPlayerLabel->setPosition(Pos2 + Vec2(-60, 0));
-			}
-			else
-			{
-				this->enemyPlayer->setFlippedX(true);
-				this->enemyPlayer->setPosition(Pos1);
-				this->enemyPlayer->setVisible(true);
-				this->friendPlayerLabel->setPosition(Pos1 + Vec2(140, 0));
-			}
-		}
-		else if (myPlayerAdded && AIPlayerAdded)
-		{
-			if (this->AIPlayer->getPosition() == Pos2)
-			{
-				this->AIPlayer->setVisible(false);
-				this->enemyPlayer->setVisible(true);
-				this->friendPlayerLabel->setPosition(Pos2 + Vec2(-60, 0));
-			}
-			else
-			{
-				this->AIPlayer->setVisible(false);
-				this->enemyPlayer->setFlippedX(true);
-				this->enemyPlayer->setPosition(Pos1);
-				this->enemyPlayer->setVisible(true);
-				this->friendPlayerLabel->setPosition(Pos1 + Vec2(140, 0));
-			}
-			AIPlayerAdded = false;
-		}
-		enemyPlayerAdded = true;
+		this->firstPlayer->setVisible(true);
+		this->secondPlayer->setVisible(true);
+		Size visibleSize = Director::getInstance()->getVisibleSize();
+		auto friendMenuItem = MenuItemFont::create(Client::getInstance()->friendID,
+			[this](Ref* r) {this->friendPlayerLabel->setVisible(true),
+			this->friendPlayerLabel->setString(Value(this->friendNum).asString() + "P:" + Client::getInstance()->friendID)
+			, AIorPerson = 2, Client::getInstance()->inviteFriend(Client::getInstance()->friendID); });
 
-		//this->friendPlayerLabel->setVisible(true);
-		this->friendPlayerLabel->setString(Value(this->friendNum).asString() + "P:" + Client::getInstance()->friendID);
-		AIorPerson = 2;
+		friendMenuItem->setPosition(Vec2(visibleSize.width / 2 - 100, visibleSize.height / 2 - 150));
+		auto friendMenu = Menu::create(friendMenuItem, NULL);
+		this->addChild(friendMenu, 2);
 	}
 	else {
 		findFriendStatusLabel->setString("Friend " + Client::getInstance()->friendID + "\n is not found!");
 	}
 }
+
 void CreateRoomScene::updateGetInvited(float dt)
 {
 	if (isInvited) {
-	//	this->myPlayer->setVisible(true);
-	//	this->enemyPlayer->setVisible(false);
+		this->firstPlayer->setVisible(true);
+		this->secondPlayer->setVisible(false);
 		if (myNum == 1) {
-
-			this->myPlayer->setVisible(true);
-			this->enemyPlayer->setVisible(true);
-
-			this->myPlayerLabel->setPosition(Pos1 + Vec2(140, 0));
+			this->myPlayerLabel->setPosition(Vec2(this->firstPlayer->getPosition()) + Vec2(100, 20));
 			this->myPlayerLabel->setVisible(true);
 			this->myPlayerLabel->setString("1P: " + Client::getInstance()->myID);
 
-			this->friendPlayerLabel->setPosition(Pos2 + Vec2(-60, 0));
+			this->friendPlayerLabel->setPosition(Vec2(this->secondPlayer->getPosition()) + Vec2(100, 20));
 			this->friendPlayerLabel->setVisible(true);
 			this->friendPlayerLabel->setString("2P: " + Client::getInstance()->friendID);
 		}
 		else {
-			this->myPlayer->setVisible(true);
-			this->enemyPlayer->setVisible(true);
-
-			this->friendPlayerLabel->setPosition(Pos1 + Vec2(140, 0));
-			this->friendPlayerLabel->setVisible(true);
-			this->friendPlayerLabel->setString("1P: " + Client::getInstance()->myID);
-
-			this->myPlayerLabel->setPosition(Pos2 + Vec2(-60, 0));
+			this->myPlayerLabel->setPosition(Vec2(this->secondPlayer->getPosition()) + Vec2(100, 20));
 			this->myPlayerLabel->setVisible(true);
-			this->myPlayerLabel->setString("2P: " + Client::getInstance()->friendID);
+			this->myPlayerLabel->setString("2P: " + Client::getInstance()->myID);
+
+			this->friendPlayerLabel->setPosition(Vec2(this->firstPlayer->getPosition()) + Vec2(100, 20));
+			this->friendPlayerLabel->setVisible(true);
+			this->friendPlayerLabel->setString("1P: " + Client::getInstance()->friendID);
 		}
 	}
 }
+
 void CreateRoomScene::backCallBack(Ref* r)
 {
 	Director::getInstance()->popScene();
@@ -285,41 +188,9 @@ void CreateRoomScene::backCallBack(Ref* r)
 
 void CreateRoomScene::startGameCallBack(Ref* r)
 {
-	if (AIorPerson == 1) {
-		auto scene = GameScene::createScene();
-		Director::getInstance()->pushScene(scene);
-	}
 	if (AIorPerson == 2) {
-		auto scene = GameNetScene::createScene();
-		Director::getInstance()->pushScene(scene);
+		Client::getInstance()->startGame("");
 	}
-	
-}
-void CreateRoomScene::aiPlayerCallBack(Ref* r)
-{
-	if (myPlayerAdded && !enemyPlayerAdded)
-	{
-		if (this->myPlayer->getPosition() == Pos1)
-		{
-			AIPlayer->setFlippedX(false);
-			AIPlayer->setVisible(true);
-			AIPlayer->setPosition(Pos2);
-			friendPlayerLabel->setVisible(true);
-			friendPlayerLabel->setString("AI");
-			friendPlayerLabel->setPosition(Pos2+ Vec2(-110, 0));
-			AIPlayerAdded = true;
-
-		}
-		else
-		{
-			AIPlayer->setFlippedX(true);
-			AIPlayer->setVisible(true);
-			AIPlayer->setPosition(Pos1);
-			friendPlayerLabel->setVisible(true);
-			friendPlayerLabel->setString("AI");
-			friendPlayerLabel->setPosition(Pos1 + Vec2(140, 0));
-			AIPlayerAdded = true;
-		}
-		AIorPerson = 1;
-	}
+	auto scene = GameScene::createScene();
+	Director::getInstance()->pushScene(scene);
 }

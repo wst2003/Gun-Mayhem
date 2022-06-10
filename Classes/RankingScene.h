@@ -16,12 +16,15 @@ public:
 
 	static std::vector<Label*> rankingLabels;
 	static std::vector<std::string>rankingData;
-	void onMouseScroll(Event* event);
+	std::vector<std::string>rankingData1;
 	void updateRankingLabels(float dt);
 
 	void backCallBack(Ref* r);
 
+	static int isMeWin;
 	CREATE_FUNC(RankingScene);
+private:
+	std::vector<std::string> reshapeRankingData(std::vector<std::string>rankingData);
 };
 
 
