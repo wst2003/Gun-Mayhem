@@ -61,14 +61,14 @@ bool SelectMapScene::init()
 	auto backButton = MenuItemImage::create("back.png", "back_selected.png", "back.png",
 		CC_CALLBACK_1(SelectMapScene::backToMenuCallBack, this));
 	auto mnBackMenu = Menu::create(backButton, NULL);
-	mnBackMenu->setPosition(Vec2(visibleSize.width * 3 / 10, visibleSize.height * 1 / 8));
+	mnBackMenu->setPosition(Vec2(visibleSize.width * 1 / 10 + 30, visibleSize.height * 1 / 8 - 50));
 	this->addChild(mnBackMenu, 1);
 
 	auto startButton = MenuItemImage::create
 	("start button.png", "start button selected.png", "start button.png",
 		CC_CALLBACK_1(SelectMapScene::startCallBack, this));
 	auto mnStartMenu = Menu::create(startButton, NULL);
-	mnStartMenu->setPosition(Vec2(visibleSize.width * 7 / 10, visibleSize.height * 1 / 8));
+	mnStartMenu->setPosition(Vec2(visibleSize.width * 1 / 10 + 1030, visibleSize.height * 1 / 8 - 40));
 	this->addChild(mnStartMenu, 1);
 
 	return true;

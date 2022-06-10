@@ -28,7 +28,7 @@ bool RegisterOrLoginScene::init()
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	auto bg = Sprite::create("ReOrLogbg.png");
+	auto bg = Sprite::create("ROLBackGround.png");
 	bg->setScaleX(visibleSize.width / bg->getContentSize().width);
 	bg->setScaleY(visibleSize.height / bg->getContentSize().height);
 	bg->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
@@ -37,7 +37,7 @@ bool RegisterOrLoginScene::init()
 	auto backButton = MenuItemImage::create("back.png", "back_selected.png", "back.png",
 		CC_CALLBACK_1(RegisterOrLoginScene::backToMenu, this));
 	auto mnBackMenu = Menu::create(backButton, NULL);
-	mnBackMenu->setPosition(Vec2(visibleSize.width-200, 50));
+	mnBackMenu->setPosition(Vec2(visibleSize.width * 1 / 10 + 30, visibleSize.height * 1 / 8 - 50));
 	this->addChild(mnBackMenu, 1);
 	/*
 	auto backMenuItem = MenuItemFont::create("Back",CC_CALLBACK_1(RegisterOrLoginScene::backToMenu,this));
@@ -46,13 +46,11 @@ bool RegisterOrLoginScene::init()
 	backMenu->setPosition(Vec2(visibleSize.width - 100, 50));
 	this->addChild(backMenu);
 */
-	auto scroll = Sprite::create("Scroll.png");
-	scroll->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2 + 70));
-	this->addChild(scroll);
 
-	registerEdixBox = ui::EditBox::create(Size(300, 50), ui::Scale9Sprite::create("chatBg.png"));
+
+	registerEdixBox = ui::EditBox::create(Size(400, 50), ui::Scale9Sprite::create("chatBg.png"));
 	registerEdixBox->setAnchorPoint(Point(0, 0));
-	registerEdixBox->setPosition(Vec2(visibleSize.width / 2 - 150, visibleSize.height / 2 + 60));
+	registerEdixBox->setPosition(Vec2(visibleSize.width / 2 - 450, visibleSize.height / 2 + 70));
 	registerEdixBox->setPlaceHolder("Please Enter Your ID:");//占位字符
 	registerEdixBox->setMaxLength(25);
 	registerEdixBox->setInputMode(EditBox::InputMode::NUMERIC);
@@ -60,24 +58,22 @@ bool RegisterOrLoginScene::init()
 	registerEdixBox->setTag(1);
 	this->addChild(registerEdixBox, 1);
 
-	auto registerMenuItem = MenuItemFont::create("Register!", CC_CALLBACK_1(RegisterOrLoginScene::registerCallBack, this));
-	registerMenuItem->setFontSize(35);
+	auto registerMenuItem = MenuItemImage::create("registerButtonNormal.png", "registerButtonSelected.png",CC_CALLBACK_1(RegisterOrLoginScene::registerCallBack, this));
+	//registerMenuItem->setFontSize(35);
 	auto registerMenu = Menu::create(registerMenuItem, NULL);
-	registerMenu->setPosition(Vec2(visibleSize.width/2,420));
+	registerMenu->setPosition(Vec2(visibleSize.width / 2+150, visibleSize.height / 2 + 96));
 	this->addChild(registerMenu, 1);
-
-	registerStatusLabel = Label::createWithTTF(" ","fonts/Arial.ttf",35);
-	registerStatusLabel->setPosition(Vec2(visibleSize.width / 2 +350, visibleSize.height / 2 + 80));
+	TTFConfig ttfConfig{ "fonts/Marker Felt.ttf",35 };
+	registerStatusLabel = Label::createWithTTF(ttfConfig,"");
+	registerStatusLabel->setPosition(Vec2(visibleSize.width / 2 -150, visibleSize.height / 2+30));
 	registerStatusLabel->setSystemFontSize(25);
+	registerStatusLabel->setColor(Color3B::BLACK);
 	this->addChild(registerStatusLabel,1);
-	
-	auto scrollSub = Sprite::create("Scroll.png");
-	scrollSub->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2 - 120));
-	this->addChild(scrollSub);
 
-	loginEdixBox = ui::EditBox::create(Size(300, 50), ui::Scale9Sprite::create("chatBg.png"));
+
+	loginEdixBox = ui::EditBox::create(Size(400, 50), ui::Scale9Sprite::create("chatBg.png"));
 	loginEdixBox->setAnchorPoint(Point(0, 0));
-	loginEdixBox->setPosition(Vec2(visibleSize.width / 2 - 150, visibleSize.height / 2 -130));
+	loginEdixBox->setPosition(Vec2(visibleSize.width / 2 - 350, visibleSize.height / 2 -125));
 	loginEdixBox->setPlaceHolder("Please Enter Your ID:");//占位字符
 	loginEdixBox->setMaxLength(25);
 	loginEdixBox->setInputMode(EditBox::InputMode::NUMERIC);
@@ -85,15 +81,16 @@ bool RegisterOrLoginScene::init()
 	loginEdixBox->setTag(1);
 	this->addChild(loginEdixBox, 1);
 
-	auto loginMenuItem = MenuItemFont::create("Login!", CC_CALLBACK_1(RegisterOrLoginScene::loginCallBack, this));
-	loginMenuItem->setFontSize(35);
+	auto loginMenuItem = MenuItemImage::create("loginButtonNormal.png", "loginButtonSelected.png",CC_CALLBACK_1(RegisterOrLoginScene::loginCallBack, this));
+	//loginMenuItem->setFontSize(35);
 	auto loginMenu = Menu::create(loginMenuItem, NULL);
-	loginMenu->setPosition(Vec2(visibleSize.width / 2, 230));
+	loginMenu->setPosition(Vec2(visibleSize.width / 2 + 240, visibleSize.height / 2 - 92));
 	this->addChild(loginMenu, 1);
 
-	loginStatusLabel = Label::createWithTTF(" ", "fonts/Arial.ttf", 35);
-	loginStatusLabel->setPosition(Vec2(visibleSize.width / 2 +350, visibleSize.height / 2 - 110));
+	loginStatusLabel = Label::createWithTTF(ttfConfig, "");
+	loginStatusLabel->setPosition(Vec2(visibleSize.width / 2-50, visibleSize.height / 2 - 170));
 	loginStatusLabel->setSystemFontSize(25);
+	loginStatusLabel->setColor(Color3B::BLACK);
 	this->addChild(loginStatusLabel, 1);
 	Client::getInstance();
 

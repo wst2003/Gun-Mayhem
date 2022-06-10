@@ -69,13 +69,13 @@ bool StartGameScene::init()
 	auto quitButton = MenuItemImage::create("quitbuttonnormal.png", "quitbuttonselected.png", "quitbuttonnormal.png",
 		CC_CALLBACK_1(StartGameScene::exitCallBack, this));
 	auto quitMn = Menu::create(quitButton, NULL);
-	quitMn->setPosition(Vec2(visibleSize.width * 5 / 7 + 150, visibleSize.height * 5 / 7 - 360));
+	quitMn->setPosition(Vec2(visibleSize.width * 5 / 7 + 150, visibleSize.height * 5 / 7 - 450));
 	this->addChild(quitMn);
 
 	auto rankButton = MenuItemImage::create("rankbuttonnormal.png", "rankbuttonnormalselected.png", "rankbuttonnormal.png",
 		CC_CALLBACK_1(StartGameScene::rankingSceneCallBack, this));
 	auto rankMn = Menu::create(rankButton, NULL);
-	rankMn->setPosition(Vec2(visibleSize.width * 5 / 7 + 150, visibleSize.height * 5 / 7 - 450));
+	rankMn->setPosition(Vec2(visibleSize.width * 5 / 7 + 150, visibleSize.height * 5 / 7 - 360));
 	this->addChild(rankMn);
 	return true;
 }

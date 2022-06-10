@@ -42,7 +42,7 @@ bool RankingScene::init()
 	auto backButton = MenuItemImage::create("back.png", "back_selected.png", "back.png",
 		CC_CALLBACK_1(RankingScene::backCallBack, this));
 	auto mnBackMenu = Menu::create(backButton, NULL);
-	mnBackMenu->setPosition(Vec2(visibleSize.width * 1 / 10 + 30, visibleSize.height * 1 / 8 - 50));
+	mnBackMenu->setPosition(Vec2(visibleSize.width * 8 / 10, visibleSize.height * 1 / 8));
 	this->addChild(mnBackMenu, 1);
 
 
