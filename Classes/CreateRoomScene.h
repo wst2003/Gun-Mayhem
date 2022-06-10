@@ -8,6 +8,11 @@
 USING_NS_CC;
 using namespace cocos2d::ui;
 
+#define PosP1 Vec2(300.0f, 630.0f) 
+#define PosP2 Vec2(1100.0f, 450.0f) 
+#define PosL1 Vec2(460.0f,625.0f)
+#define PosL2 Vec2(980.0f,435.0f)
+
 class CreateRoomScene : public cocos2d::Layer
 {
 public:
@@ -19,7 +24,8 @@ public:
 
 	void toFirstPlayer(Ref* r);
 	void toSecondPlayer(Ref* r);
-
+	//用于响应点击AI键的回调函数
+	void aiPlayerCallBack(Ref* r);
 
 	ui::EditBox* IDQueryEdixBox;
 	Label* inviteFriendStatusLabel;
@@ -36,11 +42,20 @@ public:
 	CREATE_FUNC(CreateRoomScene);
 
 	//1p、2p的背景
-	Sprite* firstPlayer = Sprite::create("elements//1pbg.png");
-	Sprite* secondPlayer = Sprite::create("elements//2pbg.png");
+	Sprite* firstPlayer = Sprite::create("player1.png");
+	Sprite* secondPlayer = Sprite::create("player2.png");
+	Sprite* aiPlayer_first = Sprite::create("AitowardsRight.png");
+	Sprite* aiPlayer_second = Sprite::create("AitowardsLeft.png");
+
+	//判断添加情况
+	bool myPlayerAdded = false;
+	bool friendPlayerAdded = false;
+	bool AIPlayerAdded = false;
+
 	//1p、2p的标签
-	Label* myPlayerLabel = Label::create();
-	Label* friendPlayerLabel = Label::create();
+	Label* myPlayerLabel;
+	Label* friendPlayerLabel;
+	
 	//提示信息，是否找到好友
 	Label* findFriendStatusLabel = Label::create();
 	static int myNum;
