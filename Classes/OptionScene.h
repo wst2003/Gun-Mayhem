@@ -4,7 +4,10 @@
 
 #include "cocos2d.h"
 #include "SystemHeader.h"
+#include "ui/UISlider.h"
 USING_NS_CC;
+using namespace ui;
+
 class OptionScene : public cocos2d::Layer
 {
     MenuItemImage* onButtonMusic;
@@ -19,6 +22,10 @@ public:
     void soundButtonOnCallBack(Ref* r);
     void soundButtonOffCallBack(Ref* r);
     void backCallBack(Ref* r);
+
+    virtual void onEnterTransitionDidFinish();
+    void changeMusicVolumeSlider(Ref* r, Slider::EventType type);
+
     CREATE_FUNC(OptionScene);
 
 };

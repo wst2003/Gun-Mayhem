@@ -34,7 +34,7 @@ bool ChatScene::init()
 
 	IDQueryEdixBox = ui::EditBox::create(Size(200, 70), ui::Scale9Sprite::create("chatBg.png"));
 	IDQueryEdixBox->setAnchorPoint(Point(0, 0));
-	IDQueryEdixBox->setPosition(Vec2(visibleSize.width*1 / 9-35 , visibleSize.height*7 / 10 + 102));
+	IDQueryEdixBox->setPosition(Vec2(visibleSize.width * 1 / 9 - 35, visibleSize.height * 7 / 10 + 102));
 	IDQueryEdixBox->setPlaceHolder("Enter ID:");//占位字符
 	IDQueryEdixBox->setMaxLength(25);
 	IDQueryEdixBox->setInputMode(EditBox::InputMode::NUMERIC);
@@ -42,12 +42,12 @@ bool ChatScene::init()
 	this->addChild(IDQueryEdixBox, 1);
 
 
-	auto chatMenuItem=MenuItemImage::create("chatButtonNormal.png","chatButtonSelected.png","chatButtonNormal.png"
+	auto chatMenuItem = MenuItemImage::create("chatButtonNormal.png", "chatButtonSelected.png", "chatButtonNormal.png"
 		, CC_CALLBACK_1(ChatScene::chatCallBack, this));
 	//auto chatMenuItem = MenuItemFont::create("Chat!", CC_CALLBACK_1(ChatScene::chatCallBack, this));
 	//chatMenuItem->setFontSize(35);
 	auto chatMenu = Menu::create(chatMenuItem, NULL);
-	chatMenu->setPosition(Vec2(visibleSize.width * 1 / 9 +240, visibleSize.height * 7 / 10 + 140));
+	chatMenu->setPosition(Vec2(visibleSize.width * 1 / 9 + 240, visibleSize.height * 7 / 10 + 140));
 	this->addChild(chatMenu, 1);
 
 	addFriendStatusLabel = Label::createWithTTF("", "fonts/Arial.ttf", 35);
@@ -66,7 +66,7 @@ bool ChatScene::init()
 	this->addChild(chatText, 2);
 
 	sendTextEdixBox = ui::EditBox::create(Size(600, 50), ui::Scale9Sprite::create("chatBg.png"));
-	sendTextEdixBox->setPosition(Vec2(visibleSize.width * 7 / 9-200 , visibleSize.height * 2 / 10));
+	sendTextEdixBox->setPosition(Vec2(visibleSize.width * 7 / 9 - 200, visibleSize.height * 2 / 10));
 	sendTextEdixBox->setPlaceHolder("Please Enter Text:");//占位字符
 	sendTextEdixBox->setMaxLength(20);
 	sendTextEdixBox->setFontSize(32);
@@ -76,16 +76,16 @@ bool ChatScene::init()
 	auto sendItem = MenuItemImage::create("sendButtonNormal.png", "sendButtonSelected.png", "sendButtonNormal.png"
 		, CC_CALLBACK_1(ChatScene::sendTextCallBack, this));
 	auto sendMenu = Menu::create(sendItem, NULL);
-	sendMenu->setPosition(Vec2(visibleSize.width * 7 / 9+160, visibleSize.height * 2 / 10));
+	sendMenu->setPosition(Vec2(visibleSize.width * 7 / 9 + 160, visibleSize.height * 2 / 10));
 	this->addChild(sendMenu, 1);
 
 	auto backButton = MenuItemImage::create("back.png", "back_selected.png", "back.png",
 		CC_CALLBACK_1(ChatScene::backCallBack, this));
 	auto mnBackMenu = Menu::create(backButton, NULL);
-	mnBackMenu->setPosition(Vec2(visibleSize.width * 1 / 10+30, visibleSize.height * 1 / 8-50));
+	mnBackMenu->setPosition(Vec2(visibleSize.width * 1 / 10 + 30, visibleSize.height * 1 / 8 - 50));
 	this->addChild(mnBackMenu, 1);
 
-	this->schedule(CC_CALLBACK_1(ChatScene::updateNewTextFromFriend, this), 0.1,"upNewText");
+	this->schedule(CC_CALLBACK_1(ChatScene::updateNewTextFromFriend, this), 0.1, "upNewText");
 	return true;
 }
 
@@ -112,14 +112,14 @@ void ChatScene::sendTextCallBack(Ref* r)
 	std::string textToFriend = sendTextEdixBox->getText();
 	Client::getInstance()->sendTextToFriend(textToFriend, Client::getInstance()->friendID);
 	if (Client::getInstance()->friendID.length() > 0) {
-		this->chatText->setString(this->chatText->getString() + "\n" + Client::getInstance() ->myID+":"+textToFriend);
+		this->chatText->setString(this->chatText->getString() + "\n" + Client::getInstance()->myID + ":" + textToFriend);
 	}
 }
 
 void ChatScene::updateNewTextFromFriend(float dt)
 {
 	if (Client::getInstance()->hasNewChatText) {
-		this->chatText->setString(this->chatText->getString() + "\n"+ Client::getInstance()->friendID+":"
+		this->chatText->setString(this->chatText->getString() + "\n" + Client::getInstance()->friendID + ":"
 			+ Client::getInstance()->textFromFriend);
 		Client::getInstance()->hasNewChatText = false;
 		Client::getInstance()->textFromFriend = "";

@@ -12,7 +12,7 @@ class loseScene : public cocos2d::Layer
 public:
 	static cocos2d::Scene* createScene();
 	virtual bool init();
-	
+
 	static std::vector<Label*> rankingLabels;
 	void onMouseScroll(Event* event);
 	void backToMenu(Ref* r);

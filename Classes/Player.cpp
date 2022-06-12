@@ -2,7 +2,6 @@
 #include "Player.h"
 #include "GameScene.h"
 #include "SystemHeader.h"
-#include"Actor.h"
 USING_NS_CC;
 
 //得到人物信息
@@ -37,20 +36,19 @@ Player* Player::createWithActor(Actor* actor)
 }
 
 
-//
+//响应键盘事件，实现移动
 void Player::actByKeyBoard(std::map<EventKeyboard::KeyCode, bool>& keyMap)
 {
 	auto now = clock();
 	auto velocity = _physicsBody->getVelocity();
-	
 	if ((keyMap[LEFT_KEY] || keyMap[A_KEY]) && now - damageTime >= 200 && now - fireTime >= 100)
 	{
-		this->moveOnGround({ -400,this->getPhysicsBody()->getVelocity().y });
+		this->moveOnGround({ SPEED_LEFT,this->getPhysicsBody()->getVelocity().y });
 		this->actorInformation.changeLeftOrRight(1);
 	}
 	if ((keyMap[RIGHT_KEY] || keyMap[D_KEY]) && now - damageTime >= 200 && now - fireTime >= 100)
 	{
-		this->moveOnGround({ 400,this->getPhysicsBody()->getVelocity().y });
+		this->moveOnGround({ SPEED_RIGHT,this->getPhysicsBody()->getVelocity().y });
 		this->actorInformation.changeLeftOrRight(2);
 	}
 	if (keyMap[UP_KEY] || keyMap[W_KEY])
@@ -70,12 +68,11 @@ void Player::actByKeyBoard(std::map<EventKeyboard::KeyCode, bool>& keyMap)
 	return;
 }
 
-//
+//响应鼠标事件，实现开火
 void Player::actByMouse(std::map<EventMouse::MouseEventType, bool>& mouseMap)
 {
 	if (mouseMap[MOUSE_DOWN] && this->gun->getFirable())
 	{
-		/*王诗腾添加*/
 		this->actorInformation.changeIsFire(true);
 		this->fire();
 	}
@@ -86,6 +83,7 @@ void Player::actByMouse(std::map<EventMouse::MouseEventType, bool>& mouseMap)
 	return;
 }
 
+//玩家开火
 void Player::fire()
 {
 	if (gun->fire())

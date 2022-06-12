@@ -18,6 +18,7 @@ public:
     void chatSceneCallBack(Ref* r);
     void rankingSceneCallBack(Ref* r);
     //virtual void onEnter();
+    virtual void onEnterTransitionDidFinish();
     //Label* loginStatusLabel;
     CREATE_FUNC(StartGameScene);
 

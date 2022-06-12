@@ -62,7 +62,8 @@ public:
 	static int friendNum;
 	static int AIorPerson;
 
-
+private:
+	int personsNum = 0;//目前有几人
 };
 
 #endif

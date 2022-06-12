@@ -12,6 +12,7 @@ using namespace  cocos2d::network;
 Client* Client::myClient = nullptr;
 bool Client::isRegister = false;
 bool Client::isLogin = false;
+bool Client::isServerConnected = false;
 
 Client::Client()
 {
@@ -35,6 +36,11 @@ Client* Client::getInstance()
 		return myClient;
 	}
 	return myClient;
+}
+
+bool Client::getIsServerConnected()
+{
+	return isServerConnected;
 }
 
 bool Client::getIsRegister()
@@ -80,9 +86,13 @@ void Client::getRegisterResult(cocos2d::network::SIOClient* client, const std::s
 		}
 		log("register succeed!");
 	}
-	else {
+	else if (reply.compare("\"0\"") == 0) {
 		isRegister = false;
 		log("register failed!");
+	}
+	else {
+		isRegister = false;
+		isServerConnected = false;
 	}
 }
 
@@ -97,13 +107,19 @@ void Client::getLoginResult(cocos2d::network::SIOClient* client, const std::stri
 	log(reply.c_str());
 	if (reply.compare("\"1\"") == 0) {
 		Client::isLogin = true;
+		isServerConnected = true;
 		loginLegally(myID);
 		log("login succeed!");
 	}
-	else {
+	else if (reply.compare("\"0\"") == 0) {
 		isLogin = false;
+		isServerConnected = true;
 		myID = "";
 		log("login failed!");
+	}
+	else {
+		isLogin = false;
+		isServerConnected = false;
 	}
 }
 

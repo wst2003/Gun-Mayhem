@@ -29,6 +29,13 @@ bool winScene::init()
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
+	//Ê¤Àû±³¾°
+	auto win = Sprite::create("win.png");
+	win->setScaleY(visibleSize.height / win->getContentSize().height);
+	win->setPosition(visibleSize / 2);
+	addChild(win);
+
+
 	auto label = Label::createWithTTF("YOU WIN ", "fonts/Arial.ttf", 35);
 	label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
 	label->setSystemFontSize(25);
@@ -40,10 +47,10 @@ bool winScene::init()
 	this->addChild(backToMenu, 1);
 
 	if (CreateRoomScene::AIorPerson == 2) {
-		auto myScoreLabel = Label::createWithTTF(Client::getInstance()->myID+" +10", "fonts/Arial.ttf", 35);
+		auto myScoreLabel = Label::createWithTTF(Client::getInstance()->myID + " +10", "fonts/Arial.ttf", 35);
 		auto enemyScoreLabel = Label::createWithTTF(Client::getInstance()->friendID + " -10", "fonts/Arial.ttf", 35);
 		myScoreLabel->setPosition(Vec2(visibleSize.width / 2 - 100, visibleSize.height / 2));
-		enemyScoreLabel->setPosition(Vec2(visibleSize.width / 2 - 100, visibleSize.height / 2-100));
+		enemyScoreLabel->setPosition(Vec2(visibleSize.width / 2 - 100, visibleSize.height / 2 - 100));
 		RankingScene::isMeWin = 1;
 	}
 

@@ -47,7 +47,7 @@ bool RankingScene::init()
 
 
 	//rankingData1 = { "1   600","23   500","345   400" ,"2052","200","110","100","123","456" };
-	
+
 	this->schedule(CC_CALLBACK_1(RankingScene::updateRankingLabels, this), 0.1, "upNewText");
 
 	return true;
@@ -105,7 +105,7 @@ void RankingScene::updateRankingLabels(float dt)
 	this->rankingLabels[4]->setPosition(1055, 485);
 	this->addChild(rankingLabels[4], 1);
 
-	for (int i = 0; i < this->rankingLabels.size() - 6; i++) {
+	for (unsigned int i = 0; i < this->rankingLabels.size() - 6; i++) {
 		this->rankingLabels[i + 6]->setTextColor(Color4B::BLACK);
 		this->rankingLabels[i + 6]->setScaleX(3);
 		this->rankingLabels[i + 6]->setScaleY(3);
@@ -116,14 +116,14 @@ void RankingScene::updateRankingLabels(float dt)
 
 std::vector<std::string> RankingScene::reshapeRankingData(std::vector<std::string>rankingData)
 {
-	
+
 	std::vector<std::string> data = {};
-	for (int i = 0; i < (rankingData.size() >= 6 ? 6 : rankingData.size()); i++) {
+	for (unsigned int i = 0; i < (rankingData.size() >= 6 ? 6 : rankingData.size()); i++) {
 		auto index = rankingData[i].find_first_of(' ', 0);
 		auto index1 = rankingData[i].find_last_of(' ');
 		auto ID = rankingData[i].substr(0, index);
 		auto score = rankingData[i].substr(index1 + 1, rankingData[i].length() - index1 - 1);
-		if (isMeWin==1&&(ID.compare(Value(Client::getInstance()->myID).asString())==0)) {
+		if (isMeWin == 1 && (ID.compare(Value(Client::getInstance()->myID).asString()) == 0)) {
 			score = Value(Value(score).asInt() + 10).asString();
 		}
 		else if (isMeWin == 2 && (ID.compare(Value(Client::getInstance()->myID).asString()) == 0)) {
@@ -139,7 +139,7 @@ std::vector<std::string> RankingScene::reshapeRankingData(std::vector<std::strin
 
 		if (i < 3) {
 			//后面三个
-		data.push_back(ID+"   "+score);
+			data.push_back(ID + "   " + score);
 		}
 		else {
 			data.push_back(ID);

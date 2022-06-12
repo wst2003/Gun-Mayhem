@@ -8,7 +8,7 @@
 USING_NS_CC;
 
 
-Scene*loseScene::createScene()
+Scene* loseScene::createScene()
 {
 	auto scene = Scene::create();
 
@@ -28,13 +28,20 @@ bool loseScene::init()
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
+	//Ê§°Ü±³¾°
+	auto lose = Sprite::create("lose.png");
+	lose->setScaleY(visibleSize.height / lose->getContentSize().height);
+	lose->setPosition(visibleSize / 2);
+	addChild(lose);
+
+
 	auto label = Label::createWithTTF("YOU LOSE ", "fonts/Arial.ttf", 35);
-	label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2 ));
+	label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
 	label->setSystemFontSize(25);
 	this->addChild(label);
 
 
-	auto backButton = MenuItemImage::create("back.png", "back_selected.png","back.png", CC_CALLBACK_1(loseScene::backToMenu, this));
+	auto backButton = MenuItemImage::create("back.png", "back_selected.png", "back.png", CC_CALLBACK_1(loseScene::backToMenu, this));
 	auto backToMenu = Menu::create(backButton, NULL);
 	backToMenu->setPosition(Vec2(visibleSize.width * 3 / 10, visibleSize.height * 1 / 8));
 	this->addChild(backToMenu, 1);

@@ -5,14 +5,10 @@
 #include "GameScene.h"
 #include "SystemHeader.h"
 #include "loseScene.h"
-#include"CreateRoomScene.h"
 #include "winScene.h"
+#include "CreateRoomScene.h"
 USING_NS_CC;
-#define SPEED_LEFT -400
-#define SPEED_RIGHT 400
-#define SPEED_UP 950
 
-bool Actor::isDie5 = false;
 //创建人物
 Actor* Actor::createActorWithPhysicsBody(const std::string& filename)
 {
@@ -21,6 +17,7 @@ Actor* Actor::createActorWithPhysicsBody(const std::string& filename)
 	if (actorPtr && actorPtr->initWithFile(filename))
 	{
 		actorPtr->autorelease();
+		//设置人物为物理刚体
 		actorPtr->_physicsBody = PhysicsBody::createBox(actorPtr->getContentSize(), PhysicsMaterial(10.0f, 0.0f, 1.0f));
 		actorPtr->_physicsBody->setDynamic(true);
 		actorPtr->_physicsBody->setRotationEnable(false);
@@ -34,7 +31,7 @@ Actor* Actor::createActorWithPhysicsBody(const std::string& filename)
 	CC_SAFE_DELETE(actorPtr);
 	return nullptr;
 }
-
+//初始化人物面板
 void Actor::initActor()
 {
 	
@@ -53,9 +50,10 @@ void Actor::initActor()
 	livesLeftLabel->setPosition(Vec2(visibleSize.width * (2 * ID + 1) / 8, visibleSize.height * 1 / 8 - 25));
 
 	bloodBar = LoadingBar::create("bloodBar.png");
-	bloodBar->setPosition(Vec2(visibleSize.width * (2 * ID + 1) / 8, visibleSize.height * 1 / 8 - 50));
+	bloodBar->setPosition(Vec2(visibleSize.width * (2 * ID + 1) / 8, visibleSize.height * 1 / 8 - 80));
 	bloodBar->setDirection(LoadingBar::Direction::LEFT);
 	bloodBar->setPercent(getBloodLeft());
+	
 	return;
 }
 
@@ -65,7 +63,7 @@ void Actor::setGun(Gun* inputGun)
 	if (_joint != nullptr)
 	{
 		log("remove");
-		GameScene::physicsWorld->removeJoint(_joint, false);
+		GameScene::physicsWorld->removeJoint(_joint, true);
 		gun->setVisible(false);
 		gun->getPhysicsBody()->setCollisionBitmask(0);
 		gun->getPhysicsBody()->setCategoryBitmask(0);
@@ -77,7 +75,8 @@ void Actor::setGun(Gun* inputGun)
 	gun->getPhysicsBody()->setCategoryBitmask(0);
 
 	gun->setPosition(this->getPosition().x + gun->getContentSize().width / 2 + this->getContentSize().width / 2, this->getPosition().y);
-
+	if (gun->getAttribute().damageValue == 50)
+		gun->getAttribute().damageValue + ID;
 	_joint = PhysicsJointFixed::construct(this->getPhysicsBody(), gun->getPhysicsBody(), this->getPosition());
 	GameScene::physicsWorld->addJoint(_joint);
 
@@ -156,8 +155,11 @@ void Actor::damagedEffect(int damage)
 	damageTime = clock();
 	auto emitter = ParticleExplosion::create();
 	emitter->setLife(0.1f);
-	emitter->setLifeVar(0.5f);
+	emitter->setLifeVar(0.2f);
+	emitter->setDuration(0.1f);
 	emitter->setPosition(this->getPosition());
+	emitter->setStartColor(Color4F::RED);
+	emitter->setEndColor(Color4F::RED);
 	this->getScene()->addChild(emitter);
 
 	_bloodLeft -= damage;
@@ -186,9 +188,10 @@ void Actor::stopAnimation()
 {
 
 }
-
+//人物开火
 void Actor::fire()
 {
+	
 	if(gun->fire())
 		this->_physicsBody->setVelocity({ (this->_flippedX ? 1 : -1) * 400.0f,_physicsBody->getVelocity().y });
 
@@ -207,56 +210,57 @@ bool Actor::getIsJumping()
 {
 	return _isJumping;
 }
-
+//设置是否下落
 void Actor::setIsDowning(bool isDowning)
 {
 	_isDowning = isDowning;
 	return;
 }
-
+//得到下落状态
 bool Actor::getIsDowning()
 {
 	return _isDowning;
 }
-
+//设置跳跃次数
 void Actor::setJumpTime(int times)
 {
 	_jumpTime = times;
 	return;
 }
-
+//得到跳跃次数
 int Actor::getJumpTime()
 {
 	return _jumpTime;
 }
+//设置是否在空中
 void Actor::setIsIntheAir(bool isInTheAir)
 {
 	_isInTheAir = isInTheAir;
 	return;
 }
+//得到是否在空中的状态
 bool Actor::getIsIntheAir()
 {
 	return _isInTheAir;
 
 }
-int Actor::getRemainingLive()
-{
-	return _remainingLive;
-}
+//设置人物剩余生命
 void Actor::setRemainingLive(int num)
 {
 	_remainingLive = num;
 	return;
 }
-
-
+//得到人物剩余生命
+int Actor::getRemainingLive()
+{
+	return _remainingLive;
+}
+//设置人物当前位置信息
 void Actor::setActorInformation()
 {
 	actorInformation.changePosition(this->getPosition());
 }
-
-
-
+//改变掩码为不可碰撞
 void Actor::changeBitMask()
 {
 	if (getPhysicsBody()->getVelocity().y < 0)
@@ -264,8 +268,8 @@ void Actor::changeBitMask()
 		if (getIsJumping()) {
 			setIsJumping(false);
 
-			getPhysicsBody()->setCollisionBitmask(1 << ID);
-			getPhysicsBody()->setCategoryBitmask(1 << ID);
+			getPhysicsBody()->setCollisionBitmask((1<<(30-(ID&1) ) )+(1<<ID));
+			getPhysicsBody()->setCategoryBitmask((1<<(30-(ID&1) ) )+(1<<ID));
 
 
 		}
@@ -299,7 +303,7 @@ void Actor::changeBitMask()
 	}
 
 }
-
+//恢复掩码为可碰撞
 void Actor::renewBitMask()
 {
 	if (getIsDowning())
@@ -308,13 +312,13 @@ void Actor::renewBitMask()
 		{
 			log("separate current ground");
 			setIsDowning(false);
-			getPhysicsBody()->setCollisionBitmask(1 << ID);
-			getPhysicsBody()->setCategoryBitmask(1 << ID);
+			getPhysicsBody()->setCollisionBitmask((1<<(30-(ID&1) ) )+(1<<ID));
+			getPhysicsBody()->setCategoryBitmask((1<<(30-(ID&1) ) )+(1<<ID));
 		}
 	}
 	return;
 }
-
+//人物触底后调用，实现状态归零
 void Actor::contactGround()
 {
 	Vec2 currentVelovity = getPhysicsBody()->getVelocity();
@@ -329,8 +333,8 @@ void Actor::contactGround()
 		}
 		else
 		{
-			getPhysicsBody()->setCollisionBitmask(1 << ID);
-			getPhysicsBody()->setCategoryBitmask(1 << ID);
+			getPhysicsBody()->setCollisionBitmask((1<<(30-(ID&1) ) )+(1<<ID));
+			getPhysicsBody()->setCategoryBitmask((1<<(30-(ID&1) ) )+(1<<ID));
 			setIsJumping(false);
 		}
 	}
@@ -342,23 +346,23 @@ void Actor::contactGround()
 	}
 	else
 	{
-		getPhysicsBody()->setCollisionBitmask(1 << ID);
-		getPhysicsBody()->setCategoryBitmask(1 << ID);
+		getPhysicsBody()->setCollisionBitmask((1<<(30-(ID&1) ) )+(1<<ID));
+		getPhysicsBody()->setCategoryBitmask((1<<(30-(ID&1) ) )+(1<<ID));
 
 		setIsDowning(false);
 	}
 }
-
+//得到人物ID
 int Actor::getID()
 {
 	return ID;
 }
-
+//设置人物ID
 void Actor::setID(int id)
 {
 	ID = id;
 }
-
+//人物重生机制，游戏结束判定
 void Actor::reLive(bool flag)
 {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -378,7 +382,6 @@ void Actor::reLive(bool flag)
 			if (currentLive == 0)
 			{
 				auto scene = flag ? loseScene::createScene() : winScene::createScene();
-				//			log("you lose");//跳转
 				Director::getInstance()->pushScene(scene);
 			}
 			this->setRemainingLive(currentLive);
@@ -412,16 +415,17 @@ void Actor::reLive(bool flag)
 	}
 	return;
 }
+//得到人物血条
 int Actor::getBloodLeft()
 {
 	return _bloodLeft;
 }
-
+//设置人物血条
 void Actor::setBloodLeft(int num)
 {
 	_bloodLeft = num;
 }
-
+//更新人物面板显示
 void Actor::renewBrand()
 {
 	char bullets[10] = {};
@@ -439,4 +443,3 @@ void Actor::renewBrand()
 	bloodBar->setPercent(_bloodLeft);
 	return;
 }
-

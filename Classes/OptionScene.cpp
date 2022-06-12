@@ -1,5 +1,9 @@
 #include"OptionScene.h"
+#include "ui/UISlider.h"
+#include "GameScene.h"
+#include "SystemHeader.h"
 USING_NS_CC;
+using namespace ui;
 
 Scene* OptionScene::createScene()
 {
@@ -47,7 +51,7 @@ bool OptionScene::init()
 	//this->addChild(offButtonMusic, 1, 124);
 	offButtonSound->setEnabled(false);
 	auto mnSound = Menu::create(onButtonSound, offButtonSound, NULL);
-	mnSound->setPosition(Vec2(visibleSize.width * 1 / 7 + 260, visibleSize.height * 1 / 8 + 15));
+	mnSound->setPosition(Vec2(visibleSize.width * 1 / 7 + 390, visibleSize.height * 1 / 8 + 15));
 	mnSound->alignItemsHorizontally();
 	this->addChild(mnSound, 1);
 
@@ -68,6 +72,24 @@ bool OptionScene::init()
 		onButtonSound->setEnabled(false);
 		offButtonSound->setEnabled(true);
 	}
+
+	
+
+	auto volumeSprite = Sprite::create("volume.png");
+	volumeSprite->setPosition(Vec2(900, 200));
+	addChild(volumeSprite);
+	auto musicVolumeSlider = Slider::create();
+	musicVolumeSlider->loadBarTexture("musicVolumeBg.png");
+	musicVolumeSlider->loadSlidBallTextures("musicVolumeBall.png");
+	musicVolumeSlider->loadProgressBarTexture("musicVolume.png");
+	musicVolumeSlider->setMaxPercent(100.0f);
+	musicVolumeSlider->setPosition(Vec2(volumeSprite->getContentSize().width + musicVolumeSlider->getContentSize().width / 2, volumeSprite->getContentSize().height / 2));
+	musicVolumeSlider->addEventListener(CC_CALLBACK_2(OptionScene::changeMusicVolumeSlider, this));
+	musicVolumeSlider->setPercent(UserDefault::getInstance()->getIntegerForKey(MUSICVOLUME));
+	volumeSprite->addChild(musicVolumeSlider);
+
+	musicVolumeSlider->setPercent(UserDefault::getInstance()->getIntegerForKey(MUSICVOLUME));
+
 
 	auto backButton = MenuItemImage::create("back.png", "back_selected.png", "back.png",
 		CC_CALLBACK_1(OptionScene::backCallBack, this));
@@ -92,8 +114,10 @@ void OptionScene::musicButtonOffCallBack(Ref* r)
 	offButton->setEnabled(false);
 	UserDefault::getInstance()->setBoolForKey(MUSIC_KEY, true);
 	int audioId = UserDefault::getInstance()->getIntegerForKey(MUSICID);
-	if (AudioEngine::getState(audioId) != AudioEngine::AudioState::PLAYING)
+	if (AudioEngine::getState(audioId) != AudioEngine::AudioState::PLAYING) {
 		UserDefault::getInstance()->setIntegerForKey(MUSICID, AudioEngine::play2d(BACKGROUNDA, true));
+		AudioEngine::setVolume(UserDefault::getInstance()->getIntegerForKey(MUSICID), UserDefault::getInstance()->getIntegerForKey(MUSICVOLUME) * 0.01f);
+	}
 }
 void OptionScene::soundButtonOnCallBack(Ref* r)
 {
@@ -112,7 +136,31 @@ void OptionScene::soundButtonOffCallBack(Ref* r)
 void OptionScene::backCallBack(Ref* r)
 {
 	Director::getInstance()->popScene();
+
 }
 
 
+void OptionScene::onEnterTransitionDidFinish()
+{
+	if (UserDefault::getInstance()->getBoolForKey(MUSIC_KEY)) {
+		int audioId = UserDefault::getInstance()->getIntegerForKey(MUSICID);
+		if (AudioEngine::getState(audioId) != AudioEngine::AudioState::PLAYING) {
+			UserDefault::getInstance()->setIntegerForKey(MUSICID, AudioEngine::play2d(BACKGROUNDA, true));
+			AudioEngine::setVolume(UserDefault::getInstance()->getIntegerForKey(MUSICID), UserDefault::getInstance()->getIntegerForKey(MUSICVOLUME) * 0.01f);
+		}
+	}
+}
 
+
+void OptionScene::changeMusicVolumeSlider(Ref* r, Slider::EventType type)
+{
+	if (type == Slider::EventType::ON_PERCENTAGE_CHANGED)
+	{
+		Slider* slider = dynamic_cast<Slider*>(r);
+		int percent = slider->getPercent();
+		UserDefault::getInstance()->setIntegerForKey(MUSICVOLUME, percent);
+		UserDefault::getInstance()->flush();
+		AudioEngine::setVolume(UserDefault::getInstance()->getIntegerForKey(MUSICID), percent * 0.01f);
+		log("change volume%f", percent);
+	}
+}

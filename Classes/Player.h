@@ -1,3 +1,4 @@
+/*玩家类，继承自人物类*/
 #pragma once
 #include "cocos2d.h"
 #include"Attribute.h"
@@ -5,6 +6,7 @@
 #include"Actor.h"
 USING_NS_CC;
 
+//玩家人物子类
 class Player : public Actor
 {
 public:

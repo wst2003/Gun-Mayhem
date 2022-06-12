@@ -4,6 +4,7 @@
 #include "Actor.h"
 USING_NS_CC;
 
+//客户端类，采用单例化设计模式
 class Client :public cocos2d::network::SocketIO::SIODelegate
 {
 public:
@@ -38,9 +39,11 @@ public:
 	void sendInfo(const std::string& info);
 	void getInfo(cocos2d::network::SIOClient* client, const std::string& info);
 
-	
+
 	static bool getIsRegister();
 	static bool getIsLogin();
+	static bool getIsServerConnected();
+
 	std::string myID;
 	std::string friendID = "";
 	bool hasNewChatText = false;
@@ -54,4 +57,5 @@ private:
 
 	static bool isRegister;
 	static bool isLogin;
+	static bool isServerConnected;
 };

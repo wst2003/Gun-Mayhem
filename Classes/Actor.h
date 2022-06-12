@@ -1,3 +1,4 @@
+/*人物类移动、开火、捡枪*/
 #pragma once
 #include "cocos2d.h"
 #include"Attribute.h"
@@ -25,9 +26,9 @@ public:
 	void fallOnGroundEffect();	//落地的效果
 	void damagedEffect(int damage);	//受伤的效果
 	void killedEffect();	//死亡的效果
-	void changeBitMask();
-	void renewBitMask();
-	void contactGround();
+	void changeBitMask();   //改变掩码为不可碰撞
+	void renewBitMask();    //恢复掩码为可碰撞
+	void contactGround();   //人物触底后调用
 
 	void setIsJumping(bool isJumping);
 	bool getIsJumping();
@@ -40,23 +41,20 @@ public:
 	bool getIsIntheAir();
 	int getRemainingLive();
 	void setRemainingLive(int num);
-
 	int getBloodLeft();
 	void setBloodLeft(int num);
-
 	int getID();
 	void setID(int id);
 	void setActorInformation();
 
 	void reLive(bool flag = false);
-
-	void renewBrand();
+	void renewBrand();   //更新人物面板
 
 	cocos2d::ui::LoadingBar* getBloodBar();
 	Label* nameLabel;
 	Label* bulletsLeftLabel;
 	Label* livesLeftLabel;
-	static bool isDie5 ;
+	static bool isDie5;
 protected:
 	virtual Animate* createFireAnimate(int gunType) { return 0; };		//创建开火动画
 	virtual Animate* createStopFireAnimate(int gunType) { return 0; };
@@ -82,5 +80,4 @@ protected:
 	clock_t fireTime;
 
 	bool isLive = true;
-	
 };

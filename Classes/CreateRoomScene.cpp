@@ -61,11 +61,8 @@ bool CreateRoomScene::init()
 	TTFConfig ttfConfig{ "fonts/Marker Felt.ttf",60 };
 	myPlayerLabel = Label::createWithTTF(ttfConfig, "");
 	friendPlayerLabel = Label::createWithTTF(ttfConfig, "");
-	//myPlayerLabel->setSystemFontSize(60);
 	myPlayerLabel->setColor(Color3B::BLACK);
-	//friendPlayerLabel->setSystemFontSize(60);
 	friendPlayerLabel->setColor(Color3B::BLACK);
-	//friendPlayerLabel->setSystemFontName("Marker Felt.ttf");
 	myPlayerLabel->setVisible(false);
 	friendPlayerLabel->setVisible(false);
 
@@ -133,6 +130,10 @@ void CreateRoomScene::toFirstPlayer(Ref* r)
 		this->myPlayerLabel->setVisible(true);
 		this->myPlayerLabel->setString("" + Client::getInstance()->myID);
 		this->friendPlayerLabel->setPosition(PosL2);
+
+		if (personsNum == 0) {
+			personsNum = 1;
+		}
 	}
 }
 
@@ -151,6 +152,10 @@ void CreateRoomScene::toSecondPlayer(Ref* r)
 		this->myPlayerLabel->setString("" + Client::getInstance()->myID);
 
 		this->friendPlayerLabel->setPosition(PosL1);
+
+		if (personsNum == 0) {
+			personsNum = 1;
+		}
 	}
 }
 
@@ -158,6 +163,9 @@ void CreateRoomScene::toSecondPlayer(Ref* r)
 
 void CreateRoomScene::findCallBack(Ref* r)
 {
+	if (!Client::getIsLogin()) {
+		return;
+	}
 	auto ID = IDQueryEdixBox->getText();
 	Client::getInstance()->addFriendRequest(ID);
 	findFriendStatusLabel->setString("Loading...");
@@ -175,13 +183,15 @@ void CreateRoomScene::updateFindFriendStatus(float dt)
 		auto friendMenuItem = MenuItemFont::create(Client::getInstance()->friendID,
 			[this](Ref* r) {this->friendPlayerLabel->setVisible(true),
 			this->friendPlayerLabel->setString(Client::getInstance()->friendID)
-			, AIorPerson = 2, Client::getInstance()->inviteFriend(Client::getInstance()->friendID); });
+			, AIorPerson = 2, Client::getInstance()->inviteFriend(Client::getInstance()->friendID),
+			personsNum==1?personsNum==2:1; });
 
 		friendMenuItem->setFontSize(50);
 		friendMenuItem->setColor(Color3B::BLACK);
 		friendMenuItem->setPosition(Vec2(visibleSize.width / 2 - 100, visibleSize.height / 2 - 150));
 		auto friendMenu = Menu::create(friendMenuItem, NULL);
 		this->addChild(friendMenu, 2);
+
 	}
 	else {
 		//findFriendStatusLabel->setString("Friend " + Client::getInstance()->friendID + "\n is not found!");
@@ -221,6 +231,9 @@ void CreateRoomScene::backCallBack(Ref* r)
 
 void CreateRoomScene::startGameCallBack(Ref* r)
 {
+	if (personsNum != 2) {
+		return;
+	}
 	if (AIorPerson == 2) {
 		Client::getInstance()->startGame("");
 	}
@@ -248,5 +261,8 @@ void CreateRoomScene::aiPlayerCallBack(Ref* r)
 			AIPlayerAdded = true;
 		}
 		AIorPerson = 1;
+		if (personsNum == 1) {
+			personsNum = 2;
+		}
 	}
 }

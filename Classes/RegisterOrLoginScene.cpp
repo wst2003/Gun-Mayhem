@@ -58,22 +58,22 @@ bool RegisterOrLoginScene::init()
 	registerEdixBox->setTag(1);
 	this->addChild(registerEdixBox, 1);
 
-	auto registerMenuItem = MenuItemImage::create("registerButtonNormal.png", "registerButtonSelected.png",CC_CALLBACK_1(RegisterOrLoginScene::registerCallBack, this));
+	auto registerMenuItem = MenuItemImage::create("registerButtonNormal.png", "registerButtonSelected.png", CC_CALLBACK_1(RegisterOrLoginScene::registerCallBack, this));
 	//registerMenuItem->setFontSize(35);
 	auto registerMenu = Menu::create(registerMenuItem, NULL);
-	registerMenu->setPosition(Vec2(visibleSize.width / 2+150, visibleSize.height / 2 + 96));
+	registerMenu->setPosition(Vec2(visibleSize.width / 2 + 150, visibleSize.height / 2 + 96));
 	this->addChild(registerMenu, 1);
 	TTFConfig ttfConfig{ "fonts/Marker Felt.ttf",35 };
-	registerStatusLabel = Label::createWithTTF(ttfConfig,"");
-	registerStatusLabel->setPosition(Vec2(visibleSize.width / 2 -150, visibleSize.height / 2+30));
+	registerStatusLabel = Label::createWithTTF(ttfConfig, "");
+	registerStatusLabel->setPosition(Vec2(visibleSize.width / 2 - 150, visibleSize.height / 2 + 30));
 	registerStatusLabel->setSystemFontSize(25);
 	registerStatusLabel->setColor(Color3B::BLACK);
-	this->addChild(registerStatusLabel,1);
+	this->addChild(registerStatusLabel, 1);
 
 
 	loginEdixBox = ui::EditBox::create(Size(400, 50), ui::Scale9Sprite::create("chatBg.png"));
 	loginEdixBox->setAnchorPoint(Point(0, 0));
-	loginEdixBox->setPosition(Vec2(visibleSize.width / 2 - 350, visibleSize.height / 2 -125));
+	loginEdixBox->setPosition(Vec2(visibleSize.width / 2 - 350, visibleSize.height / 2 - 125));
 	loginEdixBox->setPlaceHolder("Please Enter Your ID:");//Õ¼Î»×Ö·û
 	loginEdixBox->setMaxLength(25);
 	loginEdixBox->setInputMode(EditBox::InputMode::NUMERIC);
@@ -81,14 +81,14 @@ bool RegisterOrLoginScene::init()
 	loginEdixBox->setTag(1);
 	this->addChild(loginEdixBox, 1);
 
-	auto loginMenuItem = MenuItemImage::create("loginButtonNormal.png", "loginButtonSelected.png",CC_CALLBACK_1(RegisterOrLoginScene::loginCallBack, this));
+	auto loginMenuItem = MenuItemImage::create("loginButtonNormal.png", "loginButtonSelected.png", CC_CALLBACK_1(RegisterOrLoginScene::loginCallBack, this));
 	//loginMenuItem->setFontSize(35);
 	auto loginMenu = Menu::create(loginMenuItem, NULL);
 	loginMenu->setPosition(Vec2(visibleSize.width / 2 + 240, visibleSize.height / 2 - 92));
 	this->addChild(loginMenu, 1);
 
 	loginStatusLabel = Label::createWithTTF(ttfConfig, "");
-	loginStatusLabel->setPosition(Vec2(visibleSize.width / 2-50, visibleSize.height / 2 - 170));
+	loginStatusLabel->setPosition(Vec2(visibleSize.width / 2 - 50, visibleSize.height / 2 - 170));
 	loginStatusLabel->setSystemFontSize(25);
 	loginStatusLabel->setColor(Color3B::BLACK);
 	this->addChild(loginStatusLabel, 1);
@@ -106,11 +106,15 @@ void RegisterOrLoginScene::registerCallBack(Ref* r)
 	auto ID = registerEdixBox->getText();
 	Client::getInstance()->registerIDRequest(ID);
 	registerStatusLabel->setString("Loading...");
-	this->scheduleOnce(CC_CALLBACK_1(RegisterOrLoginScene::updateRegisterStatus,this), 0.5,"upRe");
+	this->scheduleOnce(CC_CALLBACK_1(RegisterOrLoginScene::updateRegisterStatus, this), 0.5, "upRe");
 }
 
 void RegisterOrLoginScene::updateRegisterStatus(float dt)
 {
+	if (!Client::getIsServerConnected()) {
+		registerStatusLabel->setString("Server is not\n connected!");
+		return;
+	}
 	if (Client::getIsRegister()) {
 		registerStatusLabel->setString("Register Succeed!");
 	}
@@ -129,6 +133,10 @@ void RegisterOrLoginScene::loginCallBack(Ref* r)
 
 void RegisterOrLoginScene::updateLoginStatus(float dt)
 {
+	if (!Client::getIsServerConnected()) {
+		loginStatusLabel->setString("Server is not\n connected!");
+		return;
+	}
 	if (Client::getIsLogin()) {
 		loginStatusLabel->setString("Login Succeed!");
 	}
